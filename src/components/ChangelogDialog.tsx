@@ -42,10 +42,6 @@ export const ChangelogDialog = () => {
       "Added more settings",
       "Made it actually do stuff :fire:"
     ],
-    "FACILITY PLANNER (This took too long): [
-      "This thing is breaking so i cant write here",
-      "Smth Smth update should be visible on Git"
-    ],
     "Installer": [
       "Its actually somewhat an installer",
       "smth smth :D"
