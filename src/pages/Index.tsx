@@ -226,6 +226,11 @@ const Index = () => {
     setLoggedIn(false);
   };
 
+  const handleShutdown = () => {
+    setLoggedIn(false);
+    setShuttingDown(true);
+  };
+
   const handleCriticalKill = (processName: string, type: "kernel" | "virus" | "bluescreen" | "memory" | "corruption" | "overload" = "kernel") => {
     setKilledProcess(processName);
     setCrashType(type);
@@ -359,7 +364,8 @@ const Index = () => {
     <>
       <Desktop 
         onLogout={handleLogout} 
-        onReboot={handleReboot} 
+        onReboot={handleReboot}
+        onShutdown={handleShutdown}
         onCriticalKill={handleCriticalKill}
         onOpenAdminPanel={() => setShowAdminPanel(true)}
         onLockdown={handleLockdown}
