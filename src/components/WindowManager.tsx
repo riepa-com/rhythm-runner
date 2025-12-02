@@ -131,7 +131,7 @@ export const WindowManager = ({ windows, onClose, onFocus, onMinimize, allWindow
       case "plugin-store":
         return <PluginStore />;
       case "crash-app":
-        return <CrashApp onCrash={() => onCriticalKill("SYSTEM_CRASH", "kernel")} />;
+        return <CrashApp onCrash={(crashType, process) => onCriticalKill(process || "system.exe", "bluescreen")} />;
       case "settings":
         return <Settings onUpdate={onUpdate} />;
       case "registry":

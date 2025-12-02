@@ -1,248 +1,253 @@
 import { useEffect, useState } from "react";
-import { AlertTriangle } from "lucide-react";
+
+export type CrashType = 
+  | "KERNEL_PANIC" 
+  | "CRITICAL_PROCESS_DIED" 
+  | "SYSTEM_SERVICE_EXCEPTION" 
+  | "MEMORY_MANAGEMENT" 
+  | "IRQL_NOT_LESS_OR_EQUAL"
+  | "PAGE_FAULT_IN_NONPAGED_AREA"
+  | "DRIVER_IRQL_NOT_LESS_OR_EQUAL"
+  | "SYSTEM_THREAD_EXCEPTION_NOT_HANDLED"
+  | "UNEXPECTED_KERNEL_MODE_TRAP"
+  | "KMODE_EXCEPTION_NOT_HANDLED"
+  | "INACCESSIBLE_BOOT_DEVICE"
+  | "VIDEO_TDR_FAILURE"
+  | "WHEA_UNCORRECTABLE_ERROR"
+  | "DPC_WATCHDOG_VIOLATION"
+  | "CLOCK_WATCHDOG_TIMEOUT"
+  | "custom";
+
+export interface CrashData {
+  stopCode: CrashType;
+  process?: string;
+  module?: string;
+  address?: string;
+  description?: string;
+  collectingData?: boolean;
+}
 
 interface CrashScreenProps {
   onReboot: () => void;
+  crashData?: CrashData;
+  // Legacy props for backwards compatibility
   killedProcess?: string;
   crashType?: "kernel" | "virus" | "bluescreen" | "memory" | "corruption" | "overload";
   customData?: { title: string; message: string } | null;
 }
 
-export const CrashScreen = ({ onReboot, killedProcess, crashType = "kernel", customData }: CrashScreenProps) => {
+const STOP_CODES: Record<CrashType, { description: string; whatFailed?: string }> = {
+  KERNEL_PANIC: {
+    description: "Your device ran into a problem and needs to restart.",
+    whatFailed: "ntoskrnl.exe"
+  },
+  CRITICAL_PROCESS_DIED: {
+    description: "A critical system process has terminated unexpectedly.",
+    whatFailed: "csrss.exe"
+  },
+  SYSTEM_SERVICE_EXCEPTION: {
+    description: "An exception occurred in a system service.",
+    whatFailed: "win32kfull.sys"
+  },
+  MEMORY_MANAGEMENT: {
+    description: "A memory management error has occurred.",
+    whatFailed: "ntoskrnl.exe"
+  },
+  IRQL_NOT_LESS_OR_EQUAL: {
+    description: "A kernel-mode process attempted to access memory at an invalid address.",
+    whatFailed: "ntoskrnl.exe"
+  },
+  PAGE_FAULT_IN_NONPAGED_AREA: {
+    description: "Invalid system memory was referenced.",
+    whatFailed: "ntfs.sys"
+  },
+  DRIVER_IRQL_NOT_LESS_OR_EQUAL: {
+    description: "A driver accessed paged memory at an invalid IRQL.",
+    whatFailed: "nvlddmkm.sys"
+  },
+  SYSTEM_THREAD_EXCEPTION_NOT_HANDLED: {
+    description: "A system thread generated an exception that was not handled.",
+    whatFailed: "atikmdag.sys"
+  },
+  UNEXPECTED_KERNEL_MODE_TRAP: {
+    description: "The system encountered an unexpected kernel mode trap.",
+    whatFailed: "ntoskrnl.exe"
+  },
+  KMODE_EXCEPTION_NOT_HANDLED: {
+    description: "A kernel mode exception was not handled.",
+    whatFailed: "ntoskrnl.exe"
+  },
+  INACCESSIBLE_BOOT_DEVICE: {
+    description: "The boot device is inaccessible.",
+    whatFailed: "storahci.sys"
+  },
+  VIDEO_TDR_FAILURE: {
+    description: "The display driver failed to respond in time.",
+    whatFailed: "nvlddmkm.sys"
+  },
+  WHEA_UNCORRECTABLE_ERROR: {
+    description: "A fatal hardware error has occurred.",
+    whatFailed: "hal.dll"
+  },
+  DPC_WATCHDOG_VIOLATION: {
+    description: "A DPC routine exceeded the system watchdog timeout.",
+    whatFailed: "storahci.sys"
+  },
+  CLOCK_WATCHDOG_TIMEOUT: {
+    description: "A processor clock interrupt was not received within the allocated interval.",
+    whatFailed: "ntoskrnl.exe"
+  },
+  custom: {
+    description: "Your device ran into a problem and needs to restart."
+  }
+};
+
+export const CrashScreen = ({ 
+  onReboot, 
+  crashData,
+  killedProcess, 
+  crashType = "kernel", 
+  customData 
+}: CrashScreenProps) => {
   const [showScreen, setShowScreen] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [qrVisible, setQrVisible] = useState(false);
 
   useEffect(() => {
     const showTimeout = setTimeout(() => {
       setShowScreen(true);
-    }, 2000);
+    }, 500);
 
-    return () => {
-      clearTimeout(showTimeout);
-    };
+    return () => clearTimeout(showTimeout);
   }, []);
 
   useEffect(() => {
-    if (showScreen && crashType === "bluescreen") {
+    if (showScreen) {
       const interval = setInterval(() => {
         setProgress(prev => {
           if (prev >= 100) {
             clearInterval(interval);
             return 100;
           }
-          return prev + 1;
+          return prev + Math.random() * 3;
         });
-      }, 100);
-      return () => clearInterval(interval);
+      }, 150);
+
+      const qrTimeout = setTimeout(() => setQrVisible(true), 800);
+
+      return () => {
+        clearInterval(interval);
+        clearTimeout(qrTimeout);
+      };
     }
-  }, [showScreen, crashType]);
+  }, [showScreen]);
 
   if (!showScreen) {
     return <div className="fixed inset-0 bg-black" />;
   }
 
-  // Custom crash screen
-  if (customData) {
-    const bgClass = crashType === "bluescreen" ? "bg-blue-600" :
-                    crashType === "memory" ? "bg-gradient-to-br from-red-950 to-black" :
-                    crashType === "corruption" ? "bg-black" :
-                    crashType === "overload" ? "bg-gradient-to-br from-orange-950 to-black" :
-                    crashType === "virus" ? "bg-gradient-to-br from-green-950 to-black" :
-                    "bg-gradient-to-br from-slate-950 to-black";
+  // Convert legacy props to new format
+  const resolvedCrashData: CrashData = crashData || {
+    stopCode: crashType === "bluescreen" ? "CRITICAL_PROCESS_DIED" :
+              crashType === "memory" ? "MEMORY_MANAGEMENT" :
+              crashType === "overload" ? "DPC_WATCHDOG_VIOLATION" :
+              crashType === "virus" ? "SYSTEM_SERVICE_EXCEPTION" :
+              "KERNEL_PANIC",
+    process: killedProcess || customData?.title,
+    description: customData?.message
+  };
 
-    return (
-      <div className={`fixed inset-0 ${bgClass} flex flex-col items-center justify-center text-white font-mono p-8 ${crashType === "virus" ? "animate-pulse" : ""}`}>
-        <div className="max-w-4xl w-full space-y-8 animate-fade-in">
-          <div className="text-center space-y-4">
-            <div className="text-6xl mb-6">😵</div>
-            <h1 className="text-4xl font-bold tracking-wider text-primary">
-              {customData.title}
-            </h1>
-          </div>
+  const stopInfo = STOP_CODES[resolvedCrashData.stopCode] || STOP_CODES.KERNEL_PANIC;
+  const displayProgress = Math.min(100, Math.floor(progress));
 
-          <div className="bg-black/30 backdrop-blur-sm rounded-2xl border border-white/20 p-6">
-            <pre className="text-sm whitespace-pre-wrap leading-relaxed text-muted-foreground">
-              {customData.message}
-            </pre>
-          </div>
-
-          <div className="text-center space-y-2 text-xs text-muted-foreground">
-            <div>Process: {killedProcess}</div>
-            <div>Type: {crashType.toUpperCase()}</div>
-            <div>Time: {new Date().toLocaleString()}</div>
-          </div>
-
-          <div className="flex justify-center">
-            <button
-              onClick={onReboot}
-              className="px-8 py-4 bg-primary text-primary-foreground font-bold rounded-xl hover:bg-primary/90 transition-all text-lg shadow-lg hover:scale-105"
-            >
-              Restart System 🔄
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Blue Screen of Death (friendly version)
-  if (crashType === "bluescreen") {
-    return (
-      <div className="fixed inset-0 bg-blue-600 text-white font-sans p-8 overflow-auto flex items-center justify-center">
-        <div className="max-w-4xl w-full animate-fade-in">
-          <div className="mb-8 text-[120px] leading-none">🙁</div>
-          
-          <div className="space-y-6 text-xl mb-8">
-            <div className="text-3xl font-bold">Oops! Something went wrong</div>
-            <div>Your simulated PC ran into a problem and needs to restart.</div>
-            <div>We're collecting some error info, then we'll restart for you.</div>
-          </div>
-
-          <div className="text-4xl font-bold mb-8">{progress}% complete</div>
-
-          <div className="space-y-4 text-lg mb-8 opacity-90">
-            <div>If you want to know more, here's the technical stuff:</div>
-            <div className="mt-4 text-2xl font-mono bg-blue-700/50 p-4 rounded-lg">
-              PROCESS_STOPPED: {killedProcess || "system.core"}
-            </div>
-            <div className="text-sm opacity-70">
-              (Don't worry, it's all simulated. Your real computer is fine! 😊)
-            </div>
-          </div>
-
-          <button
-            onClick={onReboot}
-            className="px-8 py-4 bg-white text-blue-600 font-bold rounded-xl hover:bg-gray-100 transition-all text-lg shadow-xl"
-          >
-            Restart Now
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // Memory error (friendly)
-  if (crashType === "memory") {
-    return (
-      <div className="fixed inset-0 bg-gradient-to-br from-red-950 to-black text-red-400 font-mono p-8 overflow-auto flex items-center justify-center">
-        <div className="max-w-4xl w-full animate-fade-in">
-          <div className="text-center mb-8">
-            <div className="text-6xl mb-6">🧠</div>
-            <div className="text-4xl font-bold text-red-500 mb-4">Memory Overload!</div>
-            <div className="text-xl text-muted-foreground">The simulation ran out of pretend memory</div>
-          </div>
-
-          <div className="bg-black/50 backdrop-blur-sm rounded-2xl border border-red-500/30 p-6 space-y-4 mb-8">
-            <div className="text-red-400 font-bold text-lg">What happened?</div>
-            <div className="text-muted-foreground space-y-2">
-              <div>• Process: {killedProcess || "memory.manager"}</div>
-              <div>• Issue: Simulated memory corruption</div>
-              <div>• Impact: System needs a quick restart</div>
-              <div className="text-sm opacity-70 mt-4">(This is all pretend - your real RAM is doing great!)</div>
-            </div>
-          </div>
-
-          <div className="flex justify-center">
-            <button
-              onClick={onReboot}
-              className="px-8 py-4 bg-red-500 text-white font-bold rounded-xl hover:bg-red-600 transition-all text-lg shadow-xl"
-            >
-              Clear Memory & Restart
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // System overload (friendly)
-  if (crashType === "overload") {
-    return (
-      <div className="fixed inset-0 bg-gradient-to-br from-orange-950 to-black text-orange-400 font-mono p-8 overflow-auto flex items-center justify-center">
-        <div className="max-w-4xl w-full animate-fade-in">
-          <div className="text-center mb-8">
-            <div className="text-6xl mb-6">🔥</div>
-            <div className="text-4xl font-bold text-orange-500 mb-4">System Overheated!</div>
-            <div className="text-xl text-muted-foreground">Too much simulated processing power</div>
-          </div>
-
-          <div className="bg-black/50 backdrop-blur-sm rounded-2xl border border-orange-500/30 p-6 space-y-4 mb-8">
-            <div className="text-orange-400 font-bold text-lg flex items-center gap-2">
-              <AlertTriangle className="w-5 h-5" />
-              Temperature Check
-            </div>
-            <div className="space-y-3 text-sm">
-              <div className="flex justify-between">
-                <span>CPU Temperature:</span>
-                <span className="text-red-500 font-bold">127°C (Simulated!)</span>
-              </div>
-              <div className="flex justify-between">
-                <span>System Load:</span>
-                <span className="text-orange-400 font-bold">100%</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Killed Process:</span>
-                <span className="text-muted-foreground">{killedProcess || "power.management"}</span>
-              </div>
-              <div className="text-xs text-muted-foreground mt-4 opacity-70">
-                Don't worry! This is just part of the simulation. Your real computer is running cool! ❄️
-              </div>
-            </div>
-          </div>
-
-          <div className="flex justify-center">
-            <button
-              onClick={onReboot}
-              className="px-8 py-4 bg-orange-500 text-white font-bold rounded-xl hover:bg-orange-600 transition-all text-lg shadow-xl"
-            >
-              Cool Down & Restart
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Default kernel panic (friendly)
   return (
-    <div className="fixed inset-0 bg-gradient-to-br from-slate-950 to-black text-primary font-mono p-8 overflow-auto flex items-center justify-center">
-      <div className="max-w-4xl w-full animate-fade-in">
-        <div className="text-center mb-8">
-          <div className="text-6xl mb-6">⚠️</div>
-          <div className="text-4xl font-bold text-destructive mb-4">System Stopped</div>
-          <div className="text-xl text-muted-foreground">A critical process was ended</div>
+    <div className="fixed inset-0 bg-[#0078d4] text-white font-sans overflow-hidden">
+      {/* Scan lines effect */}
+      <div className="absolute inset-0 pointer-events-none opacity-[0.02]" 
+        style={{ 
+          backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 1px, rgba(0,0,0,0.3) 1px, rgba(0,0,0,0.3) 2px)' 
+        }} 
+      />
+
+      <div className="flex flex-col items-start justify-center h-full p-16 max-w-4xl mx-auto animate-fade-in">
+        {/* Emoticon */}
+        <div className="text-[140px] leading-none mb-4 font-light">:(</div>
+        
+        {/* Main message */}
+        <div className="space-y-6 mb-12">
+          <p className="text-2xl leading-relaxed">
+            {resolvedCrashData.description || stopInfo.description}
+          </p>
+          <p className="text-xl">
+            {displayProgress}% complete
+          </p>
         </div>
 
-        <div className="bg-card/50 backdrop-blur-sm rounded-2xl border border-border p-6 space-y-4 mb-8">
-          <div className="text-destructive font-bold text-lg">What happened?</div>
-          <div className="text-muted-foreground space-y-2 text-sm">
-            <div>• You stopped a critical system process: <span className="text-primary font-bold">{killedProcess || "system.core"}</span></div>
-            <div>• The simulation can't continue without it</div>
-            <div>• A restart will fix everything</div>
-            <div className="text-xs opacity-70 mt-4">
-              (Pro tip: Try not to end critical processes next time! 😅)
+        {/* QR Code and info */}
+        <div className="flex items-start gap-6 mb-12">
+          {/* Fake QR Code */}
+          <div className={`transition-opacity duration-500 ${qrVisible ? 'opacity-100' : 'opacity-0'}`}>
+            <div className="w-24 h-24 bg-white p-2 rounded-sm">
+              <div className="w-full h-full grid grid-cols-5 gap-0.5">
+                {Array.from({ length: 25 }).map((_, i) => (
+                  <div 
+                    key={i} 
+                    className={`${Math.random() > 0.5 ? 'bg-black' : 'bg-white'}`}
+                  />
+                ))}
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="bg-destructive/10 border border-destructive/30 rounded-xl p-4 mb-8">
-          <div className="text-xs space-y-1 text-muted-foreground font-mono opacity-70">
-            <div>[ERROR] Critical process terminated: {killedProcess || "system.core"}</div>
-            <div>[ERROR] System integrity compromised</div>
-            <div>[INFO] Restart required to restore normal operation</div>
-            <div>[TIME] {new Date().toLocaleString()}</div>
+          {/* Technical info */}
+          <div className="text-sm leading-relaxed space-y-4 opacity-90">
+            <p>
+              For more information about this issue and possible fixes, visit<br />
+              https://www.urbanshade.dev/stopcode
+            </p>
+            <p>
+              If you call a support person, give them this info:
+            </p>
+            <p className="font-mono">
+              Stop code: {resolvedCrashData.stopCode.replace(/_/g, ' ')}
+            </p>
+            {(stopInfo.whatFailed || resolvedCrashData.module) && (
+              <p className="font-mono">
+                What failed: {resolvedCrashData.module || stopInfo.whatFailed}
+              </p>
+            )}
+            {resolvedCrashData.process && (
+              <p className="font-mono">
+                Process: {resolvedCrashData.process}
+              </p>
+            )}
           </div>
         </div>
 
-        <div className="flex justify-center">
-          <button
-            onClick={onReboot}
-            className="px-8 py-4 bg-primary text-primary-foreground font-bold rounded-xl hover:bg-primary/90 transition-all text-lg shadow-xl hover:scale-105"
-          >
-            Restart System
-          </button>
+        {/* Restart button */}
+        <button
+          onClick={onReboot}
+          className="px-8 py-3 bg-white/20 hover:bg-white/30 text-white font-semibold transition-colors text-lg"
+        >
+          Restart now
+        </button>
+
+        {/* Debug info at bottom */}
+        <div className="absolute bottom-8 left-16 right-16 text-xs font-mono opacity-50">
+          <div className="flex justify-between">
+            <span>URBANSHADE OS Build 22621.2428</span>
+            <span>{new Date().toLocaleString()}</span>
+          </div>
         </div>
       </div>
     </div>
   );
+};
+
+// Helper function to trigger crashes programmatically
+export const triggerCrash = (type: CrashType, options?: Partial<CrashData>) => {
+  return {
+    stopCode: type,
+    ...options
+  } as CrashData;
 };

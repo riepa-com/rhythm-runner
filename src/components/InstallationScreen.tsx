@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Shield, HardDrive, Settings, User, Check, Loader2 } from "lucide-react";
+import { Shield, HardDrive, Settings, Check, Loader2 } from "lucide-react";
 
 interface InstallationScreenProps {
   onComplete: (adminData: { username: string; password: string }) => void;
@@ -15,11 +15,7 @@ export const InstallationScreen = ({ onComplete }: InstallationScreenProps) => {
   const [autoUpdates, setAutoUpdates] = useState(true);
   const [keyboardLayout, setKeyboardLayout] = useState("US");
   
-  // User setup
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("");
+  // Removed - user setup now happens in OOBE
   
   // Product key and TOS
   const [productKey, setProductKey] = useState("");
@@ -113,34 +109,7 @@ export const InstallationScreen = ({ onComplete }: InstallationScreenProps) => {
     }
   }, [stage, installationType]);
 
-  const handleUserSetup = (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-
-    if (!username.trim()) {
-      setError("Username is required");
-      return;
-    }
-
-    if (password.length < 4) {
-      setError("Password must be at least 4 characters");
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setError("Passwords do not match");
-      return;
-    }
-
-    // Save installation type
-    localStorage.setItem("urbanshade_install_type", installationType);
-    
-    // Trigger reboot sequence
-    setStage("rebooting");
-    setTimeout(() => {
-      onComplete({ username: username.trim(), password });
-    }, 5000); // 5 seconds of reboot
-  };
+  // handleUserSetup removed - now handled in OOBE
 
   if (stage === "welcome") {
     return (
@@ -564,88 +533,18 @@ export const InstallationScreen = ({ onComplete }: InstallationScreenProps) => {
             </div>
 
             <button
-              onClick={() => setStage("user-setup")}
+              onClick={() => {
+                localStorage.setItem("urbanshade_install_type", installationType);
+                setStage("rebooting");
+                setTimeout(() => {
+                  onComplete({ username: "Administrator", password: "admin" });
+                }, 3000);
+              }}
               className="w-full px-6 py-3 rounded-lg bg-primary hover:bg-primary/80 text-black font-bold transition-all transform hover:scale-[1.02] active:scale-[0.98]"
             >
-              CONTINUE TO USER SETUP
+              FINISH INSTALLATION
             </button>
           </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (stage === "user-setup") {
-    return (
-      <div className="fixed inset-0 bg-black flex items-center justify-center text-white font-mono p-4">
-        <div className="w-full max-w-md">
-          <div className="text-center mb-8">
-            <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-primary/20 flex items-center justify-center">
-              <User className="w-10 h-10 text-primary" />
-            </div>
-            <h2 className="text-2xl font-bold text-primary mb-2">CREATE ADMINISTRATOR</h2>
-            <p className="text-sm text-muted-foreground">Setup your admin account</p>
-          </div>
-
-          <form onSubmit={handleUserSetup} className="glass-panel p-6 space-y-4">
-            <div className="p-4 rounded-lg bg-blue-500/10 border border-blue-500/30 text-blue-500 text-xs flex items-start gap-2">
-              <User className="w-4 h-4 flex-shrink-0 mt-0.5" />
-              <span>Settings saved. Create your administrator account.</span>
-            </div>
-
-            <div>
-              <label className="block text-xs text-muted-foreground mb-2">
-                Administrator Username
-              </label>
-              <input
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg bg-black/50 border border-white/10 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/30 transition-all"
-                placeholder="Enter username"
-                autoFocus
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs text-muted-foreground mb-2">
-                Password
-              </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg bg-black/50 border border-white/10 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/30 transition-all"
-                placeholder="Enter password"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs text-muted-foreground mb-2">
-                Confirm Password
-              </label>
-              <input
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg bg-black/50 border border-white/10 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/30 transition-all"
-                placeholder="Confirm password"
-              />
-            </div>
-
-            {error && (
-              <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/30 text-destructive text-xs">
-                {error}
-              </div>
-            )}
-
-            <button
-              type="submit"
-              className="w-full px-6 py-3 rounded-lg bg-primary hover:bg-primary/80 text-black font-bold transition-all transform hover:scale-[1.02] active:scale-[0.98]"
-            >
-              CREATE ACCOUNT & FINISH
-            </button>
-          </form>
         </div>
       </div>
     );
