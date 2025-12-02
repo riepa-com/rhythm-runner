@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Shield, HardDrive, Settings, User, Check, Loader2 } from "lucide-react";
+import { Shield, HardDrive, Settings, Check, Loader2 } from "lucide-react";
 
 interface InstallationScreenProps {
   onComplete: (adminData: { username: string; password: string }) => void;
@@ -15,11 +15,7 @@ export const InstallationScreen = ({ onComplete }: InstallationScreenProps) => {
   const [autoUpdates, setAutoUpdates] = useState(true);
   const [keyboardLayout, setKeyboardLayout] = useState("US");
   
-  // User setup
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("");
+  // Removed - user setup now happens in OOBE
   
   // Product key and TOS
   const [productKey, setProductKey] = useState("");
@@ -113,67 +109,41 @@ export const InstallationScreen = ({ onComplete }: InstallationScreenProps) => {
     }
   }, [stage, installationType]);
 
-  const handleUserSetup = (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-
-    if (!username.trim()) {
-      setError("Username is required");
-      return;
-    }
-
-    if (password.length < 4) {
-      setError("Password must be at least 4 characters");
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setError("Passwords do not match");
-      return;
-    }
-
-    // Save installation type
-    localStorage.setItem("urbanshade_install_type", installationType);
-    
-    // Trigger reboot sequence
-    setStage("rebooting");
-    setTimeout(() => {
-      onComplete({ username: username.trim(), password });
-    }, 5000); // 5 seconds of reboot
-  };
+  // handleUserSetup removed - now handled in OOBE
 
   if (stage === "welcome") {
     return (
-      <div className="fixed inset-0 bg-black flex items-center justify-center text-white font-mono p-4">
+      <div className="fixed inset-0 bg-gradient-to-br from-primary/10 via-background to-primary/5 flex items-center justify-center text-foreground font-mono p-4">
         <div className="w-full max-w-2xl">
           <div className="text-center mb-8">
-            <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-primary/20 flex items-center justify-center animate-pulse">
+            <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-primary/20 to-primary/30 flex items-center justify-center animate-scale-in">
               <Shield className="w-12 h-12 text-primary" />
             </div>
-            <h1 className="text-4xl font-bold mb-4 text-primary">URBANSHADE OS</h1>
-            <p className="text-lg text-muted-foreground">Installation Wizard v3.7.1</p>
-            <div className="mt-6 text-sm text-yellow-500">
-              ⚠ CLASSIFIED SYSTEM - AUTHORIZED PERSONNEL ONLY
+            <h1 className="text-4xl font-bold mb-4 text-primary">Welcome! 🎉</h1>
+            <p className="text-lg">Let's set up UrbanShade OS</p>
+            <div className="mt-6 text-sm text-primary/70">
+              Ready to create your underwater desktop?
             </div>
           </div>
 
-          <div className="glass-panel p-8 space-y-6">
+          <div className="bg-card/50 backdrop-blur-sm border border-border rounded-2xl p-8 space-y-6 shadow-xl">
             <div className="space-y-3 text-sm">
-              <p className="text-primary font-bold">Welcome to Urbanshade Operating System Setup</p>
-              <p className="text-muted-foreground">
-                This wizard will guide you through the installation of the Urbanshade facility management system.
+              <p className="text-primary font-bold text-lg">Hey there! 👋</p>
+              <p className="text-muted-foreground leading-relaxed">
+                This friendly wizard will help you set up your simulated deep-sea facility management system.
+                Don't worry, it's quick and easy!
               </p>
-              <div className="p-4 rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-yellow-500 text-xs">
-                <strong>NOTICE:</strong> This system is designed for deep-sea facility operations.
-                Ensure all hardware requirements are met before proceeding.
+              <div className="p-4 rounded-lg bg-primary/10 border border-primary/30 text-sm">
+                <strong className="text-primary">Quick Setup:</strong> We'll create your account, configure some settings, 
+                and get you diving in no time. Takes about 2-3 minutes!
               </div>
             </div>
 
             <button
               onClick={() => setStage("product-key")}
-              className="w-full px-6 py-3 rounded-lg bg-primary hover:bg-primary/80 text-black font-bold transition-all transform hover:scale-[1.02] active:scale-[0.98]"
+              className="w-full px-6 py-3 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg"
             >
-              BEGIN INSTALLATION
+              Let's Get Started! →
             </button>
           </div>
         </div>
@@ -186,14 +156,14 @@ export const InstallationScreen = ({ onComplete }: InstallationScreenProps) => {
     const isValidKey = validKeys.includes(productKey.toUpperCase());
 
     return (
-      <div className="fixed inset-0 bg-black flex items-center justify-center text-white font-mono p-4">
+      <div className="fixed inset-0 bg-gradient-to-br from-primary/10 via-background to-primary/5 flex items-center justify-center text-foreground font-mono p-4">
         <div className="w-full max-w-2xl">
           <div className="text-center mb-6">
-            <h2 className="text-2xl font-bold text-primary">PRODUCT KEY</h2>
-            <p className="text-sm text-muted-foreground mt-2">Enter your 25-character product key</p>
+            <h2 className="text-2xl font-bold text-primary">Quick Activation 🔑</h2>
+            <p className="text-sm text-muted-foreground mt-2">Enter any demo key to continue</p>
           </div>
 
-          <div className="glass-panel p-8 space-y-6">
+          <div className="bg-card/50 backdrop-blur-sm border border-border rounded-2xl p-8 space-y-6 shadow-xl">
             <div className="space-y-4">
               <label className="block">
                 <span className="text-sm font-bold text-primary mb-2 block">Product Key</span>
@@ -202,30 +172,30 @@ export const InstallationScreen = ({ onComplete }: InstallationScreenProps) => {
                   value={productKey}
                   onChange={(e) => setProductKey(e.target.value.toUpperCase())}
                   placeholder="XXXXX-XXXX-XXXXX-XXXX"
-                  className="w-full px-4 py-3 rounded-lg bg-black/50 border border-white/10 focus:border-primary focus:outline-none text-center text-lg font-mono tracking-wider"
+                  className="w-full px-4 py-3 rounded-lg bg-background border border-border focus:border-primary focus:outline-none text-center text-lg font-mono tracking-wider"
                   maxLength={25}
                 />
               </label>
 
               {productKey && !isValidKey && (
-                <div className="text-xs text-destructive">
-                  Invalid product key. Try: URBSH-2024-FACIL-MGMT
+                <div className="text-xs text-destructive flex items-center gap-2">
+                  <span>❌ Try one of the demo keys below!</span>
                 </div>
               )}
 
               {isValidKey && (
-                <div className="text-xs text-green-500 flex items-center gap-2">
+                <div className="text-xs text-green-500 flex items-center gap-2 font-bold">
                   <Check className="w-4 h-4" />
-                  Valid product key
+                  ✅ Perfect! You're all set
                 </div>
               )}
 
-              <div className="p-4 rounded-lg bg-muted/10 border border-muted/30 text-xs text-muted-foreground">
-                <p className="font-bold mb-2">Demo Keys (for testing):</p>
-                <ul className="space-y-1 font-mono">
-                  <li>• URBSH-2024-FACIL-MGMT</li>
-                  <li>• DEMO-KEY-URBANSHADE</li>
-                  <li>• TEST-INSTALL-KEY</li>
+              <div className="p-4 rounded-lg bg-primary/10 border border-primary/30 text-xs">
+                <p className="font-bold mb-2 text-primary">✨ Demo Keys (pick any!):</p>
+                <ul className="space-y-1 font-mono text-muted-foreground">
+                  <li className="hover:text-primary cursor-pointer transition-colors">• URBSH-2024-FACIL-MGMT</li>
+                  <li className="hover:text-primary cursor-pointer transition-colors">• DEMO-KEY-URBANSHADE</li>
+                  <li className="hover:text-primary cursor-pointer transition-colors">• TEST-INSTALL-KEY</li>
                 </ul>
               </div>
             </div>
@@ -233,16 +203,16 @@ export const InstallationScreen = ({ onComplete }: InstallationScreenProps) => {
             <div className="flex gap-4">
               <button
                 onClick={() => setStage("welcome")}
-                className="flex-1 px-6 py-3 rounded-lg bg-white/10 hover:bg-white/20 transition-all"
+                className="flex-1 px-6 py-3 rounded-xl bg-muted/50 hover:bg-muted transition-all"
               >
-                Back
+                ← Back
               </button>
               <button
                 onClick={() => setStage("tos")}
                 disabled={!isValidKey}
-                className="flex-1 px-6 py-3 rounded-lg bg-primary hover:bg-primary/80 text-black font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 px-6 py-3 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
               >
-                Next
+                Next →
               </button>
             </div>
           </div>
@@ -563,88 +533,18 @@ export const InstallationScreen = ({ onComplete }: InstallationScreenProps) => {
             </div>
 
             <button
-              onClick={() => setStage("user-setup")}
+              onClick={() => {
+                localStorage.setItem("urbanshade_install_type", installationType);
+                setStage("rebooting");
+                setTimeout(() => {
+                  onComplete({ username: "Administrator", password: "admin" });
+                }, 3000);
+              }}
               className="w-full px-6 py-3 rounded-lg bg-primary hover:bg-primary/80 text-black font-bold transition-all transform hover:scale-[1.02] active:scale-[0.98]"
             >
-              CONTINUE TO USER SETUP
+              FINISH INSTALLATION
             </button>
           </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (stage === "user-setup") {
-    return (
-      <div className="fixed inset-0 bg-black flex items-center justify-center text-white font-mono p-4">
-        <div className="w-full max-w-md">
-          <div className="text-center mb-8">
-            <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-primary/20 flex items-center justify-center">
-              <User className="w-10 h-10 text-primary" />
-            </div>
-            <h2 className="text-2xl font-bold text-primary mb-2">CREATE ADMINISTRATOR</h2>
-            <p className="text-sm text-muted-foreground">Setup your admin account</p>
-          </div>
-
-          <form onSubmit={handleUserSetup} className="glass-panel p-6 space-y-4">
-            <div className="p-4 rounded-lg bg-blue-500/10 border border-blue-500/30 text-blue-500 text-xs flex items-start gap-2">
-              <User className="w-4 h-4 flex-shrink-0 mt-0.5" />
-              <span>Settings saved. Create your administrator account.</span>
-            </div>
-
-            <div>
-              <label className="block text-xs text-muted-foreground mb-2">
-                Administrator Username
-              </label>
-              <input
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg bg-black/50 border border-white/10 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/30 transition-all"
-                placeholder="Enter username"
-                autoFocus
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs text-muted-foreground mb-2">
-                Password
-              </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg bg-black/50 border border-white/10 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/30 transition-all"
-                placeholder="Enter password"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs text-muted-foreground mb-2">
-                Confirm Password
-              </label>
-              <input
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg bg-black/50 border border-white/10 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/30 transition-all"
-                placeholder="Confirm password"
-              />
-            </div>
-
-            {error && (
-              <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/30 text-destructive text-xs">
-                {error}
-              </div>
-            )}
-
-            <button
-              type="submit"
-              className="w-full px-6 py-3 rounded-lg bg-primary hover:bg-primary/80 text-black font-bold transition-all transform hover:scale-[1.02] active:scale-[0.98]"
-            >
-              CREATE ACCOUNT & FINISH
-            </button>
-          </form>
         </div>
       </div>
     );

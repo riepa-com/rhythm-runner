@@ -36,56 +36,71 @@ export const UpdateScreen = ({ onComplete }: UpdateScreenProps) => {
   }, [onComplete, progress]);
 
   return (
-    <div className="h-screen w-full flex flex-col items-center justify-center bg-primary text-primary-foreground overflow-hidden animate-fade-in">
+    <div className="h-screen w-full flex flex-col items-center justify-center bg-gradient-to-br from-primary/90 via-primary to-primary/80 text-primary-foreground overflow-hidden animate-fade-in">
       {/* Animated Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-primary/80" />
+      <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-cyan-500" />
+      <div className="absolute inset-0 opacity-20">
+        <div className="absolute inset-0" style={{
+          backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px)',
+          backgroundSize: '30px 30px'
+        }} />
+      </div>
       
       {/* Spinning Loading Animation */}
       <div className="relative z-10 mb-12">
-        <div className="w-24 h-24 relative animate-spin" style={{ animationDuration: '2s' }}>
-          <div className="absolute inset-0 rounded-full border-8 border-primary-foreground/20"></div>
-          <div className="absolute inset-0 rounded-full border-8 border-transparent border-t-primary-foreground"></div>
+        <div className="w-28 h-28 relative">
+          <div className="absolute inset-0 rounded-full border-8 border-primary-foreground/20 animate-ping" style={{ animationDuration: '2s' }}></div>
+          <div className="absolute inset-0 rounded-full border-8 border-transparent border-t-primary-foreground animate-spin" style={{ animationDuration: '1s' }}></div>
         </div>
       </div>
 
       {/* Content */}
-      <div className="relative z-10 text-center space-y-6 max-w-md px-8">
-        <h1 className="text-4xl font-bold mb-2 animate-fade-in">Windows Update</h1>
+      <div className="relative z-10 text-center space-y-8 max-w-lg px-8">
+        <h1 className="text-5xl font-bold mb-3 animate-fade-in drop-shadow-lg">System Update</h1>
         
-        <div className="space-y-4 animate-fade-in" style={{ animationDelay: "0.2s" }}>
-          <p className="text-lg">
-            {stage === "downloading" && "Trabajando en las actualizaciones"}
-            {stage === "preparing" && "Preparando actualizaciones"}
-            {stage === "installing" && "Instalando actualizaciones"}
-            {stage === "finishing" && "Finalizando actualización"}
+        <div className="space-y-5 animate-fade-in" style={{ animationDelay: "0.2s" }}>
+          <p className="text-xl font-medium">
+            {stage === "downloading" && "Downloading updates..."}
+            {stage === "preparing" && "Preparing installation..."}
+            {stage === "installing" && "Installing updates..."}
+            {stage === "finishing" && "Finalizing update..."}
           </p>
           
-          <p className="text-sm opacity-90">
-            No desconectes tu PC. Esta acción puede tardar unos minutos.
-          </p>
-          
-          <p className="text-sm opacity-80">
-            Al final de la actualización, tu PC se liberará automáticamente.
-          </p>
+          <div className="bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/20 rounded-xl p-4 space-y-2">
+            <p className="text-sm opacity-95">
+              Please don't turn off your device. This may take several minutes.
+            </p>
+            <p className="text-sm opacity-80">
+              Your system will restart automatically when the update completes.
+            </p>
+          </div>
         </div>
 
         {/* Progress */}
-        <div className="pt-8 space-y-3 animate-fade-in" style={{ animationDelay: "0.4s" }}>
-          <div className="text-2xl font-bold">{progress}%</div>
+        <div className="pt-6 space-y-4 animate-fade-in" style={{ animationDelay: "0.4s" }}>
+          <div className="text-4xl font-bold tabular-nums">{progress}%</div>
           
           {/* Progress Bar */}
-          <div className="w-full h-1 bg-primary-foreground/20 rounded-full overflow-hidden">
+          <div className="w-full h-2 bg-primary-foreground/20 rounded-full overflow-hidden shadow-inner">
             <div 
-              className="h-full bg-primary-foreground transition-all duration-300 ease-out"
+              className="h-full bg-primary-foreground transition-all duration-300 ease-out rounded-full shadow-lg"
               style={{ width: `${progress}%` }}
             />
+          </div>
+          
+          <div className="text-sm opacity-70 font-mono">
+            {progress < 30 && "Fetching update packages..."}
+            {progress >= 30 && progress < 60 && "Verifying system integrity..."}
+            {progress >= 60 && progress < 90 && "Applying changes..."}
+            {progress >= 90 && "Completing installation..."}
           </div>
         </div>
       </div>
 
       {/* Bottom Info */}
-      <div className="absolute bottom-8 text-center text-sm opacity-70 animate-fade-in" style={{ animationDelay: "0.6s" }}>
-        <p>URBANSHADE OS v2.0.0</p>
+      <div className="absolute bottom-8 text-center text-sm opacity-70 animate-fade-in space-y-1" style={{ animationDelay: "0.6s" }}>
+        <p className="font-bold">UrbanShade OS v2.2.0</p>
+        <p className="text-xs opacity-60">Build 2024.12.02</p>
       </div>
     </div>
   );

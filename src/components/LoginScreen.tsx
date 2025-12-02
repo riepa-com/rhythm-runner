@@ -42,85 +42,106 @@ export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
   };
 
   return (
-    <div className="h-screen w-full flex items-center justify-center bg-background relative overflow-hidden">
-      {/* Animated background */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary to-transparent animate-pulse"></div>
-        <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary to-transparent animate-pulse"></div>
+    <div className="h-screen w-full flex items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 relative overflow-hidden">
+      {/* Animated background grid */}
+      <div className="absolute inset-0 opacity-20">
+        <div className="absolute inset-0" style={{
+          backgroundImage: 'linear-gradient(hsl(var(--primary) / 0.1) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary) / 0.1) 1px, transparent 1px)',
+          backgroundSize: '50px 50px'
+        }} />
       </div>
 
       <div className="relative z-10 w-full max-w-md p-8 animate-fade-in">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center mb-4 animate-scale-in">
-            <TerminalIcon className="w-16 h-16 text-primary urbanshade-glow" />
+        <div className="text-center mb-10">
+          <div className="flex items-center justify-center mb-6 animate-scale-in">
+            <div className="p-4 rounded-2xl bg-primary/10 border border-primary/20 shadow-lg shadow-primary/10">
+              <TerminalIcon className="w-14 h-14 text-primary" />
+            </div>
           </div>
-          <h1 className="text-4xl font-bold mb-2 text-primary animate-fade-in" style={{ animationDelay: '100ms' }}>URBANSHADE</h1>
-          <p className="text-sm text-muted-foreground font-mono animate-fade-in" style={{ animationDelay: '200ms' }}>
-            SECURE OPERATING SYSTEM v3.2.1
+          <h1 className="text-5xl font-bold mb-3 bg-gradient-to-r from-primary via-cyan-400 to-primary bg-clip-text text-transparent animate-fade-in" style={{ animationDelay: '100ms' }}>
+            URBANSHADE
+          </h1>
+          <p className="text-sm text-muted-foreground font-medium animate-fade-in mb-3" style={{ animationDelay: '200ms' }}>
+            Secure Operating System v2.2.0
           </p>
-          <div className="mt-4 text-xs text-muted-foreground font-mono animate-fade-in" style={{ animationDelay: '300ms' }}>
-            [CLASSIFIED FACILITY] • DEPTH: 8,247m • PRESSURE: EXTREME
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 animate-fade-in" style={{ animationDelay: '300ms' }}>
+            <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+            <span className="text-xs font-mono text-muted-foreground">Depth: 8,247m • Pressure: Extreme</span>
           </div>
         </div>
 
         {/* Login Form */}
         <form onSubmit={handleLogin} className="space-y-4 animate-fade-in" style={{ animationDelay: '400ms' }}>
-          <div className="glass-panel p-6 space-y-4">
-            <div className="flex items-center gap-2 mb-4 text-primary">
-              <Lock className="w-5 h-5" />
-              <span className="font-bold text-sm">AUTHENTICATION REQUIRED</span>
+          <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-2xl p-6 space-y-5 shadow-xl">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="p-2 rounded-lg bg-primary/10 border border-primary/20">
+                <Lock className="w-4 h-4 text-primary" />
+              </div>
+              <span className="font-bold text-sm text-foreground">Authentication Required</span>
             </div>
 
             <div>
-              <label className="block text-xs text-muted-foreground mb-2 font-mono">
-                USERNAME
+              <label className="block text-xs font-medium text-muted-foreground mb-2">
+                Username
               </label>
               <input
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full px-4 py-2 bg-black/40 border border-white/10 rounded-lg text-foreground font-mono text-sm focus:border-primary/50 focus:outline-none transition-all duration-200 focus:scale-[1.02]"
-                placeholder="Enter username"
+                className="w-full px-4 py-3 bg-background border border-border rounded-xl text-foreground text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none transition-all"
+                placeholder="Enter your username"
                 disabled={loading}
                 autoFocus
               />
             </div>
 
             <div>
-              <label className="block text-xs text-muted-foreground mb-2 font-mono">
-                PASSWORD
+              <label className="block text-xs font-medium text-muted-foreground mb-2">
+                Password
               </label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-2 bg-black/40 border border-white/10 rounded-lg text-foreground font-mono text-sm focus:border-primary/50 focus:outline-none transition-all duration-200 focus:scale-[1.02]"
-                placeholder="Enter password"
+                className="w-full px-4 py-3 bg-background border border-border rounded-xl text-foreground text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none transition-all"
+                placeholder="Enter your password"
                 disabled={loading}
               />
             </div>
 
             {error && (
-              <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-xs font-mono animate-fade-in">
-                ⚠ ERROR: {error}
+              <div className="p-3 rounded-xl bg-destructive/10 border border-destructive/30 text-destructive text-sm animate-fade-in flex items-start gap-2">
+                <span className="text-base">⚠️</span>
+                <span>{error}</span>
               </div>
             )}
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full px-4 py-3 rounded-lg bg-primary/20 border border-primary/30 text-primary font-bold hover:bg-primary/30 transition-all duration-200 hover-scale disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full px-4 py-3 rounded-xl bg-primary text-primary-foreground font-bold hover:bg-primary/90 transition-all shadow-lg hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
             >
-              {loading ? "AUTHENTICATING..." : "LOGIN"}
+              {loading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                  Authenticating...
+                </span>
+              ) : (
+                "Sign In"
+              )}
             </button>
           </div>
         </form>
 
         {/* Footer */}
-        <div className="mt-6 text-center text-xs text-muted-foreground font-mono space-y-1 animate-fade-in" style={{ animationDelay: '500ms' }}>
-          <div>© 2024 Urbanshade Corporation</div>
-          <div className="text-destructive">⚠ UNAUTHORIZED ACCESS IS PROHIBITED</div>
+        <div className="mt-8 text-center text-xs text-muted-foreground/60 space-y-1.5 animate-fade-in" style={{ animationDelay: '500ms' }}>
+          <div>© 2024 UrbanShade Corporation</div>
+          <div className="flex items-center justify-center gap-2 text-destructive/80">
+            <span className="text-base">⚠️</span>
+            <span>Unauthorized access is prohibited</span>
+          </div>
+          <div className="text-muted-foreground/40 pt-2">This is a simulated operating system</div>
         </div>
       </div>
     </div>
