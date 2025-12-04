@@ -5,6 +5,7 @@ import { StartMenu } from "./StartMenu";
 import { WindowManager } from "./WindowManager";
 import { RecoveryMode } from "./RecoveryMode";
 import { ContextMenu, getDesktopMenuItems } from "./ContextMenu";
+import { actionDispatcher } from "@/lib/actionDispatcher";
 import { FileText, Database, Activity, Radio, FileBox, AlertTriangle, Terminal, Users, Wifi, Cpu, Mail, Globe, Music, Camera, Shield, MapPin, BookOpen, Zap, Wind, Calculator as CalcIcon, Lock, FileWarning, Grid3x3, ShoppingBag, StickyNote, Palette, Volume2, CloudRain, Clock as ClockIcon, Calendar, Newspaper, Key, HardDrive, FileArchive, FileText as PdfIcon, Sheet, Presentation, Video, Image, Mic, Gamepad2, MessageSquare, VideoIcon, MailOpen, FolderUp, TerminalSquare, Network, HardDrive as DiskIcon, Settings as SettingsIcon, Activity as PerformanceIcon, ScanLine, Languages, BookOpenCheck, Globe2, MapPinned, Telescope, Beaker, Calculator as PhysicsIcon, Fingerprint, Lock as EncryptionIcon, KeyRound, Download, Puzzle, Skull, Monitor } from "lucide-react";
 import { toast } from "sonner";
 
@@ -46,12 +47,16 @@ export const Desktop = ({
     return { start, end };
   });
 
-  // Listen for settings changes
+  // Listen for settings changes and dispatch startup event
   useEffect(() => {
+    actionDispatcher.system("Desktop environment loaded");
+    actionDispatcher.system(`Installation type: ${localStorage.getItem('urbanshade_install_type') || 'standard'}`);
+    
     const handleStorageChange = () => {
       const start = localStorage.getItem('settings_bg_gradient_start') || '#1a1a2e';
       const end = localStorage.getItem('settings_bg_gradient_end') || '#16213e';
       setBgGradient({ start, end });
+      actionDispatcher.file("Settings updated");
     };
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
@@ -86,14 +91,21 @@ export const Desktop = ({
         w.id === app.id ? { ...w, zIndex: nextZIndex } : w
       ));
       setNextZIndex(prev => prev + 1);
+      actionDispatcher.window(`Focused: ${app.name}`);
     } else {
       setWindows(prev => [...prev, { id: app.id, app, zIndex: nextZIndex }]);
       setNextZIndex(prev => prev + 1);
+      actionDispatcher.window(`Opened: ${app.name}`);
+      actionDispatcher.app(`${app.name} started`);
     }
     setStartMenuOpen(false);
   };
 
   const closeWindow = (id: string) => {
+    const win = windows.find(w => w.id === id);
+    if (win) {
+      actionDispatcher.window(`Closed: ${win.app.name}`);
+    }
     setWindows(prev => prev.filter(w => w.id !== id));
   };
 
@@ -281,34 +293,34 @@ export const Desktop = ({
       id: "downloads",
       name: "Downloads",
       icon: <Download className="w-11 h-11" />,
-      run: () => openWindow(allApps[22]),
+      run: () => openWindow(allApps[23]),
       minimalInclude: true
     },
     {
       id: "plugin-store",
       name: "Plugin Store",
       icon: <Puzzle className="w-11 h-11" />,
-      run: () => openWindow(allApps[23]),
+      run: () => openWindow(allApps[24]),
       minimalInclude: true
     },
     {
       id: "crash-app",
       name: "System Crash",
       icon: <Skull className="w-11 h-11" />,
-      run: () => openWindow(allApps[24])
+      run: () => openWindow(allApps[25])
     },
     {
       id: "settings",
       name: "Settings",
       icon: <SettingsIcon className="w-11 h-11" />,
-      run: () => openWindow(allApps[25]),
+      run: () => openWindow(allApps[26]),
       minimalInclude: true
     },
     {
       id: "file-reader",
       name: "File Reader",
       icon: <FileText className="w-11 h-11" />,
-      run: () => openWindow(allApps[26]),
+      run: () => openWindow(allApps[27]),
       standardInclude: true
     },
     // Downloadable Apps
@@ -316,294 +328,294 @@ export const Desktop = ({
       id: "notepad",
       name: "Notepad",
       icon: <StickyNote className="w-11 h-11" />,
-      run: () => openWindow(allApps[27]),
+      run: () => openWindow(allApps[28]),
       downloadable: true
     },
     {
       id: "paint",
       name: "Paint Tool",
       icon: <Palette className="w-11 h-11" />,
-      run: () => openWindow(allApps[28]),
+      run: () => openWindow(allApps[29]),
       downloadable: true
     },
     {
       id: "music-player",
       name: "Media Player",
       icon: <Volume2 className="w-11 h-11" />,
-      run: () => openWindow(allApps[29]),
+      run: () => openWindow(allApps[30]),
       downloadable: true
     },
     {
       id: "weather",
       name: "Weather Monitor",
       icon: <CloudRain className="w-11 h-11" />,
-      run: () => openWindow(allApps[30]),
+      run: () => openWindow(allApps[31]),
       downloadable: true
     },
     {
       id: "clock",
       name: "World Clock",
       icon: <ClockIcon className="w-11 h-11" />,
-      run: () => openWindow(allApps[31]),
+      run: () => openWindow(allApps[32]),
       downloadable: true
     },
     {
       id: "calendar",
       name: "Event Calendar",
       icon: <Calendar className="w-11 h-11" />,
-      run: () => openWindow(allApps[32]),
+      run: () => openWindow(allApps[33]),
       downloadable: true
     },
     {
       id: "notes",
       name: "Advanced Notes",
       icon: <Newspaper className="w-11 h-11" />,
-      run: () => openWindow(allApps[33]),
+      run: () => openWindow(allApps[34]),
       downloadable: true
     },
     {
       id: "vpn",
       name: "Secure VPN",
       icon: <Shield className="w-11 h-11" />,
-      run: () => openWindow(allApps[34]),
+      run: () => openWindow(allApps[35]),
       downloadable: true
     },
     {
       id: "firewall",
       name: "Network Firewall",
       icon: <Shield className="w-11 h-11" />,
-      run: () => openWindow(allApps[35]),
+      run: () => openWindow(allApps[36]),
       downloadable: true
     },
     {
       id: "antivirus",
       name: "Virus Scanner",
       icon: <Shield className="w-11 h-11" />,
-      run: () => openWindow(allApps[36]),
+      run: () => openWindow(allApps[37]),
       downloadable: true
     },
     {
       id: "backup",
       name: "Data Backup",
       icon: <HardDrive className="w-11 h-11" />,
-      run: () => openWindow(allApps[37]),
+      run: () => openWindow(allApps[38]),
       downloadable: true
     },
     {
       id: "compression",
       name: "File Compressor",
       icon: <FileArchive className="w-11 h-11" />,
-      run: () => openWindow(allApps[38]),
+      run: () => openWindow(allApps[39]),
       downloadable: true
     },
     {
       id: "pdf-reader",
       name: "PDF Viewer",
       icon: <PdfIcon className="w-11 h-11" />,
-      run: () => openWindow(allApps[39]),
+      run: () => openWindow(allApps[40]),
       downloadable: true
     },
     {
       id: "spreadsheet",
       name: "Data Sheets",
       icon: <Sheet className="w-11 h-11" />,
-      run: () => openWindow(allApps[40]),
+      run: () => openWindow(allApps[41]),
       downloadable: true
     },
     {
       id: "presentation",
       name: "Slide Maker",
       icon: <Presentation className="w-11 h-11" />,
-      run: () => openWindow(allApps[41]),
+      run: () => openWindow(allApps[42]),
       downloadable: true
     },
     {
       id: "video-editor",
       name: "Video Editor",
       icon: <Video className="w-11 h-11" />,
-      run: () => openWindow(allApps[42]),
+      run: () => openWindow(allApps[43]),
       downloadable: true
     },
     {
       id: "image-viewer",
       name: "Photo Gallery",
       icon: <Image className="w-11 h-11" />,
-      run: () => openWindow(allApps[43]),
+      run: () => openWindow(allApps[44]),
       downloadable: true
     },
     {
       id: "audio-editor",
       name: "Sound Editor",
       icon: <Mic className="w-11 h-11" />,
-      run: () => openWindow(allApps[44]),
+      run: () => openWindow(allApps[45]),
       downloadable: true
     },
     {
       id: "game-center",
       name: "Game Hub",
       icon: <Gamepad2 className="w-11 h-11" />,
-      run: () => openWindow(allApps[45]),
+      run: () => openWindow(allApps[46]),
       downloadable: true
     },
     {
       id: "chat",
       name: "Instant Chat",
       icon: <MessageSquare className="w-11 h-11" />,
-      run: () => openWindow(allApps[46]),
+      run: () => openWindow(allApps[47]),
       downloadable: true
     },
     {
       id: "video-call",
       name: "Video Conference",
       icon: <VideoIcon className="w-11 h-11" />,
-      run: () => openWindow(allApps[47]),
+      run: () => openWindow(allApps[48]),
       downloadable: true
     },
     {
       id: "email-client",
       name: "Mail Client Pro",
       icon: <MailOpen className="w-11 h-11" />,
-      run: () => openWindow(allApps[48]),
+      run: () => openWindow(allApps[49]),
       downloadable: true
     },
     {
       id: "ftp",
       name: "FTP Manager",
       icon: <FolderUp className="w-11 h-11" />,
-      run: () => openWindow(allApps[49]),
+      run: () => openWindow(allApps[50]),
       downloadable: true
     },
     {
       id: "ssh",
       name: "SSH Terminal",
       icon: <TerminalSquare className="w-11 h-11" />,
-      run: () => openWindow(allApps[50]),
+      run: () => openWindow(allApps[51]),
       downloadable: true
     },
     {
       id: "packet-analyzer",
       name: "Packet Sniffer",
       icon: <Network className="w-11 h-11" />,
-      run: () => openWindow(allApps[51]),
+      run: () => openWindow(allApps[52]),
       downloadable: true
     },
     {
       id: "disk-manager",
       name: "Disk Utility",
       icon: <DiskIcon className="w-11 h-11" />,
-      run: () => openWindow(allApps[52]),
+      run: () => openWindow(allApps[53]),
       downloadable: true
     },
     {
       id: "registry",
       name: "Registry Editor",
       icon: <Key className="w-11 h-11" />,
-      run: () => openWindow(allApps[53]),
+      run: () => openWindow(allApps[54]),
       downloadable: true
     },
     {
       id: "performance",
       name: "Performance Analyzer",
       icon: <PerformanceIcon className="w-11 h-11" />,
-      run: () => openWindow(allApps[54]),
+      run: () => openWindow(allApps[55]),
       downloadable: true
     },
     {
       id: "scanner",
       name: "Document Scanner",
       icon: <ScanLine className="w-11 h-11" />,
-      run: () => openWindow(allApps[55]),
+      run: () => openWindow(allApps[56]),
       downloadable: true
     },
     {
       id: "translator",
       name: "Language Translator",
       icon: <Languages className="w-11 h-11" />,
-      run: () => openWindow(allApps[56]),
+      run: () => openWindow(allApps[57]),
       downloadable: true
     },
     {
       id: "dictionary",
       name: "Digital Dictionary",
       icon: <BookOpenCheck className="w-11 h-11" />,
-      run: () => openWindow(allApps[57]),
+      run: () => openWindow(allApps[58]),
       downloadable: true
     },
     {
       id: "encyclopedia",
       name: "Encyclopedia",
       icon: <Globe2 className="w-11 h-11" />,
-      run: () => openWindow(allApps[58]),
+      run: () => openWindow(allApps[59]),
       downloadable: true
     },
     {
       id: "map-viewer",
       name: "Map Navigator",
       icon: <MapPinned className="w-11 h-11" />,
-      run: () => openWindow(allApps[59]),
+      run: () => openWindow(allApps[60]),
       downloadable: true
     },
     {
       id: "gps",
       name: "GPS Tracker",
       icon: <MapPin className="w-11 h-11" />,
-      run: () => openWindow(allApps[60]),
+      run: () => openWindow(allApps[61]),
       downloadable: true
     },
     {
       id: "astronomy",
       name: "Star Chart",
       icon: <Telescope className="w-11 h-11" />,
-      run: () => openWindow(allApps[61]),
+      run: () => openWindow(allApps[62]),
       downloadable: true
     },
     {
       id: "chemistry",
       name: "Chemistry Lab",
       icon: <Beaker className="w-11 h-11" />,
-      run: () => openWindow(allApps[62]),
+      run: () => openWindow(allApps[63]),
       downloadable: true
     },
     {
       id: "physics",
       name: "Physics Simulator",
       icon: <PhysicsIcon className="w-11 h-11" />,
-      run: () => openWindow(allApps[63]),
+      run: () => openWindow(allApps[64]),
       downloadable: true
     },
     {
       id: "biometric",
       name: "Biometric Scanner",
       icon: <Fingerprint className="w-11 h-11" />,
-      run: () => openWindow(allApps[64]),
+      run: () => openWindow(allApps[65]),
       downloadable: true
     },
     {
       id: "encryption",
       name: "File Encryptor",
       icon: <EncryptionIcon className="w-11 h-11" />,
-      run: () => openWindow(allApps[65]),
+      run: () => openWindow(allApps[66]),
       downloadable: true
     },
     {
       id: "password-manager",
       name: "Password Vault",
       icon: <KeyRound className="w-11 h-11" />,
-      run: () => openWindow(allApps[66]),
+      run: () => openWindow(allApps[67]),
       downloadable: true
     },
     {
       id: "img-editor",
       name: ".Img Editor",
       icon: <FileArchive className="w-11 h-11" />,
-      run: () => openWindow(allApps[67]),
+      run: () => openWindow(allApps[68]),
       downloadable: true
     },
     {
       id: "account-settings",
       name: "Account Settings",
       icon: <Users className="w-11 h-11" />,
-      run: () => openWindow(allApps[68]),
+      run: () => openWindow(allApps[69]),
       minimalInclude: true
     }
   ];

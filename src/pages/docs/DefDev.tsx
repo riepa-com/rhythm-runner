@@ -1,4 +1,4 @@
-import { ArrowLeft, Bug, Terminal, Database, HardDrive, AlertTriangle, Info, Eye, Download, Trash2, Copy, RefreshCw, Shield, Zap } from "lucide-react";
+import { ArrowLeft, Bug, Terminal, Database, HardDrive, AlertTriangle, Info, Eye, Download, Trash2, Copy, RefreshCw, Shield, Zap, Activity, Code, FileWarning, Server, Cpu, Network } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const DefDevDocs = () => {
@@ -28,7 +28,7 @@ const DefDevDocs = () => {
             <h2 className="text-4xl font-bold text-amber-400">DEF-DEV Console</h2>
           </div>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Developer Environment and Debugging Tool for UrbanShade OS
+            Developer Environment and Debugging Tool for UrbanShade OS v2.0
           </p>
         </section>
 
@@ -37,7 +37,7 @@ const DefDevDocs = () => {
           <h3 className="text-2xl font-bold border-b border-white/10 pb-2">Overview</h3>
           <p className="text-muted-foreground">
             DEF-DEV is a comprehensive debugging and development console for UrbanShade OS. It provides real-time logging, 
-            localStorage inspection, recovery image management, and system action monitoring. This tool is intended for 
+            localStorage inspection, recovery image management, action monitoring, and system diagnostics. This tool is intended for 
             developers and advanced users performing troubleshooting or system analysis.
           </p>
         </section>
@@ -57,6 +57,37 @@ const DefDevDocs = () => {
               <p>Attempting to access /def-dev without Developer Mode enabled will display an error message: 
               "!COULDN'T BIND TO PAGE! (Check if Dev mode is enabled)"</p>
             </div>
+          </div>
+        </section>
+
+        {/* Error Types */}
+        <section className="space-y-6">
+          <h3 className="text-2xl font-bold border-b border-white/10 pb-2">Error Types & Codes</h3>
+          <p className="text-muted-foreground">
+            DEF-DEV uses standardized error codes for system issues. These appear in the Action Logger and Console tabs.
+          </p>
+          
+          <div className="grid gap-3">
+            {[
+              { code: "!COULDN'T FIND BIN/FILE!", desc: "LocalStorage key or file doesn't exist", color: "red" },
+              { code: "!LOCALSTORAGE ACCESS DENIED!", desc: "Browser blocked localStorage access", color: "red" },
+              { code: "!ACCESS LEVEL INSUFFICIENT!", desc: "User lacks required permissions", color: "orange" },
+              { code: "!NETWORK BIND FAILED!", desc: "Failed to establish connection", color: "yellow" },
+              { code: "!PROCESS TERMINATED UNEXPECTEDLY!", desc: "Application crashed or was killed", color: "red" },
+              { code: "!MEMORY ALLOCATION FAILED!", desc: "System ran out of available memory", color: "purple" },
+              { code: "!OPERATION TIMED OUT!", desc: "Request exceeded time limit", color: "yellow" },
+              { code: "!INVALID OPERATION REQUESTED!", desc: "Attempted unsupported action", color: "orange" },
+              { code: "!DATA CORRUPTION DETECTED!", desc: "Stored data is malformed or damaged", color: "red" },
+              { code: "!AUTHENTICATION FAILED!", desc: "Login or security check failed", color: "red" },
+            ].map(({ code, desc, color }) => (
+              <div key={code} className={`p-3 bg-${color}-500/10 border border-${color}-500/30 rounded-lg flex items-start gap-3`}>
+                <FileWarning className={`w-5 h-5 text-${color}-400 mt-0.5 flex-shrink-0`} />
+                <div>
+                  <code className={`text-${color}-400 font-mono text-sm font-bold`}>{code}</code>
+                  <p className="text-muted-foreground text-sm mt-1">{desc}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </section>
 
@@ -108,22 +139,44 @@ const DefDevDocs = () => {
           {/* Actions Tab */}
           <div className="p-6 bg-black/40 border border-white/10 rounded-lg space-y-4">
             <div className="flex items-center gap-3">
-              <Zap className="w-6 h-6 text-purple-400" />
+              <Activity className="w-6 h-6 text-purple-400" />
               <h4 className="text-xl font-bold">Actions Tab</h4>
             </div>
             <p className="text-muted-foreground">
-              Monitors all system actions and user interactions in real-time.
+              Monitors all system actions and user interactions in real-time. Connected to the OS action bus.
             </p>
             <div className="text-sm space-y-2">
               <p><strong className="text-foreground">Tracked Action Types:</strong></p>
-              <ul className="grid grid-cols-2 gap-2 text-muted-foreground ml-4">
-                <li>• SYSTEM - Core system events</li>
-                <li>• APP - Application events</li>
-                <li>• FILE - File system operations</li>
-                <li>• USER - User interactions</li>
-                <li>• SECURITY - Security events</li>
-                <li>• WINDOW - Window management</li>
-              </ul>
+              <div className="grid grid-cols-2 gap-2 text-muted-foreground ml-4">
+                <div className="flex items-center gap-2">
+                  <span className="w-3 h-3 rounded bg-purple-500/50"></span>
+                  <span>SYSTEM - Core system events</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-3 h-3 rounded bg-blue-500/50"></span>
+                  <span>APP - Application events</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-3 h-3 rounded bg-cyan-500/50"></span>
+                  <span>FILE - File system operations</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-3 h-3 rounded bg-yellow-500/50"></span>
+                  <span>USER - User interactions</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-3 h-3 rounded bg-orange-500/50"></span>
+                  <span>SECURITY - Security events</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-3 h-3 rounded bg-green-500/50"></span>
+                  <span>WINDOW - Window management</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-3 h-3 rounded bg-red-500/50"></span>
+                  <span>ERROR - System errors</span>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -140,6 +193,7 @@ const DefDevDocs = () => {
               <p>• Search entries by key name</p>
               <p>• View raw values stored in each entry</p>
               <p>• Monitor storage size and entry count</p>
+              <p>• Clear all storage (requires confirmation)</p>
             </div>
           </div>
 
@@ -154,7 +208,7 @@ const DefDevDocs = () => {
             </p>
             <div className="text-sm space-y-2">
               <div className="flex items-start gap-3">
-                <RefreshCw className="w-4 h-4 text-green-400 mt-1" />
+                <Zap className="w-4 h-4 text-green-400 mt-1" />
                 <div>
                   <strong className="text-foreground">Capture Current State:</strong>
                   <p className="text-muted-foreground">Save the current system state as a recovery image.</p>
@@ -195,6 +249,32 @@ const DefDevDocs = () => {
           </div>
         </section>
 
+        {/* Action Dispatcher API */}
+        <section className="space-y-4">
+          <h3 className="text-2xl font-bold border-b border-white/10 pb-2">Action Dispatcher API</h3>
+          <p className="text-muted-foreground">
+            For developers: The Action Dispatcher allows you to send events from any component to DEF-DEV.
+          </p>
+          <div className="p-4 bg-black/60 border border-white/10 rounded-lg">
+            <pre className="text-sm text-cyan-400 overflow-x-auto">
+{`import { actionDispatcher } from "@/lib/actionDispatcher";
+
+// Dispatch different action types
+actionDispatcher.system("System initialized");
+actionDispatcher.app("Application started");
+actionDispatcher.file("File saved: document.txt");
+actionDispatcher.user("User clicked button");
+actionDispatcher.security("Access granted");
+actionDispatcher.window("Window opened: Settings");
+
+// Dispatch errors with standard codes
+actionDispatcher.dispatchError("FILE_NOT_FOUND", "config.json");
+actionDispatcher.dispatchError("PERMISSION_DENIED", "admin area");
+actionDispatcher.dispatchError("STORAGE_ERROR", "quota exceeded");`}
+            </pre>
+          </div>
+        </section>
+
         {/* Bugcheck System */}
         <section className="space-y-4">
           <h3 className="text-2xl font-bold border-b border-white/10 pb-2">Bugcheck System</h3>
@@ -209,7 +289,46 @@ const DefDevDocs = () => {
               <li>• <strong>RENDER_LOOP_DETECTED:</strong> Component enters infinite render cycle</li>
               <li>• <strong>MEMORY_PRESSURE:</strong> Excessive localStorage or state accumulation</li>
               <li>• <strong>UNHANDLED_EXCEPTION:</strong> Critical JavaScript errors that escape error boundaries</li>
+              <li>• <strong>KERNEL_PANIC:</strong> System core process terminated unexpectedly</li>
+              <li>• <strong>STORAGE_CORRUPTION:</strong> LocalStorage data validation failed</li>
             </ul>
+          </div>
+        </section>
+
+        {/* Advanced Functions */}
+        <section className="space-y-4">
+          <h3 className="text-2xl font-bold border-b border-white/10 pb-2">Advanced Functions</h3>
+          <div className="grid gap-4">
+            <div className="p-4 bg-black/40 border border-white/10 rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <Server className="w-5 h-5 text-cyan-400" />
+                <h4 className="font-semibold">System State Snapshots</h4>
+              </div>
+              <p className="text-muted-foreground text-sm">
+                Capture complete system state including all localStorage, settings, and installed apps.
+                Use for debugging or creating restore points.
+              </p>
+            </div>
+            <div className="p-4 bg-black/40 border border-white/10 rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <Network className="w-5 h-5 text-green-400" />
+                <h4 className="font-semibold">Event Bus Monitoring</h4>
+              </div>
+              <p className="text-muted-foreground text-sm">
+                Monitor all custom events dispatched across the system. Useful for debugging
+                inter-component communication.
+              </p>
+            </div>
+            <div className="p-4 bg-black/40 border border-white/10 rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <Cpu className="w-5 h-5 text-purple-400" />
+                <h4 className="font-semibold">Performance Metrics</h4>
+              </div>
+              <p className="text-muted-foreground text-sm">
+                Track localStorage size, active windows, and event throughput to identify
+                performance bottlenecks.
+              </p>
+            </div>
           </div>
         </section>
 
@@ -224,13 +343,14 @@ const DefDevDocs = () => {
             <li>• Loading a recovery image will replace ALL current system data</li>
             <li>• In Developer Mode, some persistence features may be bypassed</li>
             <li>• Bugcheck reports may contain sensitive system information</li>
+            <li>• Clearing storage will reset the entire OS to initial state</li>
           </ul>
         </section>
 
         {/* Footer */}
         <footer className="text-center pt-8 border-t border-white/10 space-y-4">
           <p className="text-sm text-muted-foreground">
-            DEF-DEV Console Documentation • UrbanShade OS Developer Tools
+            DEF-DEV Console Documentation • UrbanShade OS Developer Tools v2.0
           </p>
           <Link to="/docs" className="inline-block text-amber-400 hover:underline text-sm font-semibold">
             ← Back to Documentation

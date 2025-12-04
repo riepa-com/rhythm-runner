@@ -229,6 +229,7 @@ export const WindowManager = ({ windows, onClose, onFocus, onMinimize, allWindow
       case "account-settings":
         return <AccountSettings />;
       case "image-editor":
+      case "img-editor":
         return <ImageEditor />;
       case "computer-management":
         return <ComputerManagement />;
