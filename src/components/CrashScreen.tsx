@@ -178,6 +178,21 @@ export const CrashScreen = ({
           <p className="text-2xl leading-relaxed">
             {resolvedCrashData.description || stopInfo.description}
           </p>
+          
+          {/* Honest explanation */}
+          <div className="bg-white/10 border border-white/20 rounded-lg p-4 max-w-2xl">
+            <p className="text-base leading-relaxed opacity-90">
+              <span className="font-semibold text-yellow-200">This is a real error, not a simulation.</span>
+              <br />
+              Something went wrong — either an action triggered an unhandled exception, 
+              or there's a bug in the system that needs fixing. We're sorry for the inconvenience.
+              <br /><br />
+              <span className="opacity-70 text-sm">
+                If this keeps happening, try accessing Recovery Mode on next boot or report the issue.
+              </span>
+            </p>
+          </div>
+          
           <p className="text-xl">
             {displayProgress}% complete
           </p>
@@ -224,13 +239,30 @@ export const CrashScreen = ({
           </div>
         </div>
 
-        {/* Restart button */}
-        <button
-          onClick={onReboot}
-          className="px-8 py-3 bg-white/20 hover:bg-white/30 text-white font-semibold transition-colors text-lg"
-        >
-          Restart now
-        </button>
+        {/* Action buttons */}
+        <div className="flex gap-4">
+          <button
+            onClick={onReboot}
+            className="px-8 py-3 bg-white/20 hover:bg-white/30 text-white font-semibold transition-colors text-lg"
+          >
+            Restart now
+          </button>
+          <button
+            onClick={() => {
+              // Store crash data for def-dev
+              localStorage.setItem('urbanshade_crash_entry', JSON.stringify({
+                stopCode: resolvedCrashData.stopCode,
+                process: resolvedCrashData.process,
+                module: resolvedCrashData.module || stopInfo.whatFailed,
+                timestamp: new Date().toISOString()
+              }));
+              window.location.href = "/def-dev?from=crash";
+            }}
+            className="px-8 py-3 bg-amber-500/30 hover:bg-amber-500/40 text-amber-200 font-semibold transition-colors text-lg border border-amber-500/50"
+          >
+            Debug Error
+          </button>
+        </div>
 
         {/* Debug info at bottom */}
         <div className="absolute bottom-8 left-16 right-16 text-xs font-mono opacity-50">
