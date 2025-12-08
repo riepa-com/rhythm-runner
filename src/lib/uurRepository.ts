@@ -146,63 +146,77 @@ export const UUR_REAL_PACKAGES: Record<string, UURPackage> = {
 
 // Sanitize HTML to prevent XSS - only allow safe tags and attributes
 export const sanitizeHtml = (html: string): string => {
-  // Create a DOM parser
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(html, 'text/html');
+  // Fallback: if we can't parse, return escaped HTML
+  if (!html) return '';
   
-  // Allowed tags
-  const allowedTags = ['div', 'span', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'pre', 'code', 'ul', 'ol', 'li', 'br', 'hr', 'strong', 'em', 'b', 'i'];
-  
-  // Allowed attributes
-  const allowedAttrs = ['style', 'class'];
-  
-  // Disallowed style patterns (scripts, expressions)
-  const dangerousStylePatterns = [
-    /javascript:/gi,
-    /expression\s*\(/gi,
-    /behavior:/gi,
-    /-moz-binding/gi,
-    /url\s*\([^)]*script/gi,
-  ];
-  
-  const sanitizeNode = (node: Node): void => {
-    if (node.nodeType === Node.ELEMENT_NODE) {
-      const el = node as Element;
-      const tagName = el.tagName.toLowerCase();
-      
-      // Check if tag is allowed
-      if (!allowedTags.includes(tagName)) {
-        // Replace with span but keep content
-        const span = doc.createElement('span');
-        while (el.firstChild) {
-          span.appendChild(el.firstChild);
-        }
-        el.parentNode?.replaceChild(span, el);
-        return;
-      }
-      
-      // Remove disallowed attributes
-      const attrs = Array.from(el.attributes);
-      for (const attr of attrs) {
-        if (!allowedAttrs.includes(attr.name.toLowerCase())) {
-          el.removeAttribute(attr.name);
-        } else if (attr.name.toLowerCase() === 'style') {
-          // Check for dangerous patterns in style
-          let style = attr.value;
-          for (const pattern of dangerousStylePatterns) {
-            style = style.replace(pattern, '');
-          }
-          el.setAttribute('style', style);
-        }
-      }
-      
-      // Recursively sanitize children
-      Array.from(el.childNodes).forEach(sanitizeNode);
+  try {
+    // Create a DOM parser
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    
+    // Check if body exists
+    if (!doc.body) {
+      console.warn('[UUR] DOMParser failed to create body, returning raw HTML');
+      return html;
     }
-  };
-  
-  sanitizeNode(doc.body);
-  return doc.body.innerHTML;
+    
+    // Allowed tags
+    const allowedTags = ['div', 'span', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'pre', 'code', 'ul', 'ol', 'li', 'br', 'hr', 'strong', 'em', 'b', 'i'];
+    
+    // Allowed attributes
+    const allowedAttrs = ['style', 'class'];
+    
+    // Disallowed style patterns (scripts, expressions)
+    const dangerousStylePatterns = [
+      /javascript:/gi,
+      /expression\s*\(/gi,
+      /behavior:/gi,
+      /-moz-binding/gi,
+      /url\s*\([^)]*script/gi,
+    ];
+    
+    const sanitizeNode = (node: Node): void => {
+      if (node.nodeType === Node.ELEMENT_NODE) {
+        const el = node as Element;
+        const tagName = el.tagName.toLowerCase();
+        
+        // Check if tag is allowed
+        if (!allowedTags.includes(tagName)) {
+          // Replace with span but keep content
+          const span = doc.createElement('span');
+          while (el.firstChild) {
+            span.appendChild(el.firstChild);
+          }
+          el.parentNode?.replaceChild(span, el);
+          return;
+        }
+        
+        // Remove disallowed attributes
+        const attrs = Array.from(el.attributes);
+        for (const attr of attrs) {
+          if (!allowedAttrs.includes(attr.name.toLowerCase())) {
+            el.removeAttribute(attr.name);
+          } else if (attr.name.toLowerCase() === 'style') {
+            // Check for dangerous patterns in style
+            let style = attr.value;
+            for (const pattern of dangerousStylePatterns) {
+              style = style.replace(pattern, '');
+            }
+            el.setAttribute('style', style);
+          }
+        }
+        
+        // Recursively sanitize children
+        Array.from(el.childNodes).forEach(sanitizeNode);
+      }
+    };
+    
+    sanitizeNode(doc.body);
+    return doc.body.innerHTML;
+  } catch (err) {
+    console.warn('[UUR] Sanitization failed, returning raw HTML:', err);
+    return html;
+  }
 };
 
 // Get app HTML by ID (sanitized)
