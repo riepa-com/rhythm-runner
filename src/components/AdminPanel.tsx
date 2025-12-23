@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { AlertTriangle, Terminal as TerminalIcon, Power, RefreshCw, Shield, Bug } from "lucide-react";
+import { AlertTriangle, Terminal as TerminalIcon, Power, RefreshCw, Shield, Bug, Lock } from "lucide-react";
 import { Button } from "./ui/button";
 import { toast } from "sonner";
 import { systemBus } from "@/lib/systemBus";
@@ -12,6 +12,10 @@ interface AdminPanelProps {
 }
 
 export const AdminPanel = ({ onExit, onChaos, onCrash, onCustomCrash }: AdminPanelProps) => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [password, setPassword] = useState("");
+  const [authError, setAuthError] = useState(false);
+  
   const [glitchMode, setGlitchMode] = useState(false);
   const [rainbowMode, setRainbowMode] = useState(false);
   const [funMode, setFunMode] = useState(false);
@@ -20,6 +24,72 @@ export const AdminPanel = ({ onExit, onChaos, onCrash, onCustomCrash }: AdminPan
   const [customCrashType, setCustomCrashType] = useState<"kernel" | "virus" | "bluescreen" | "memory" | "corruption" | "overload">("kernel");
   const [customCrashTitle, setCustomCrashTitle] = useState("CUSTOM SYSTEM ERROR");
   const [customCrashMessage, setCustomCrashMessage] = useState("This is a custom crash message.\nYou can write anything here.\n\nMultiple lines supported!");
+
+  const correctPassword = "HereIsThePassword";
+
+  const handleAuth = () => {
+    if (password === correctPassword) {
+      setIsAuthenticated(true);
+      setAuthError(false);
+      toast.success("Authentication successful");
+    } else {
+      setAuthError(true);
+      toast.error("Invalid password");
+    }
+  };
+
+  // Auth screen
+  if (!isAuthenticated) {
+    return (
+      <div className="fixed inset-0 z-[9999] bg-black flex items-center justify-center p-8 font-mono">
+        <div className="w-full max-w-md">
+          <div className="text-center mb-8">
+            <Lock className="w-16 h-16 text-primary mx-auto mb-4" />
+            <div className="text-primary font-bold text-xl mb-2">ADMIN AUTHENTICATION</div>
+            <div className="text-xs text-muted-foreground">Level 5 clearance required</div>
+          </div>
+
+          <div className="border border-primary/30 bg-primary/5 p-6 space-y-4">
+            <div>
+              <label className="text-xs text-primary mb-2 block">ADMIN PASSWORD</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => { setPassword(e.target.value); setAuthError(false); }}
+                onKeyDown={(e) => e.key === "Enter" && handleAuth()}
+                placeholder="Enter password..."
+                className={`w-full bg-black border ${authError ? "border-red-500" : "border-primary/30"} px-4 py-3 text-primary focus:outline-none focus:border-primary`}
+                autoFocus
+              />
+              {authError && (
+                <div className="text-red-500 text-xs mt-2">Access denied. Invalid credentials.</div>
+              )}
+            </div>
+
+            <div className="flex gap-3">
+              <Button
+                onClick={handleAuth}
+                className="flex-1 bg-primary text-black hover:bg-primary/90"
+              >
+                AUTHENTICATE
+              </Button>
+              <Button
+                onClick={onExit}
+                variant="outline"
+                className="border-primary/30 text-primary hover:bg-primary/10"
+              >
+                EXIT
+              </Button>
+            </div>
+
+            <div className="text-[10px] text-muted-foreground text-center pt-4 border-t border-primary/20">
+              Hint: Check the HTML source or docs for the password
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const handleGlitchMode = () => {
     setGlitchMode(!glitchMode);

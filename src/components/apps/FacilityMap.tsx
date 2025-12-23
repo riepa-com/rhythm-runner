@@ -1,74 +1,122 @@
 import { useState, useEffect, useRef } from "react";
-import { MapPin, AlertTriangle, CheckCircle, XCircle, Users, Activity, ZoomIn, ZoomOut, RotateCcw, Move, Eye, Radio, Thermometer, Droplets, Wind, Shield, Download, Upload } from "lucide-react";
+import { MapPin, AlertTriangle, CheckCircle, XCircle, Users, Crosshair, ZoomIn, ZoomOut, RotateCcw, Move, Download, Skull, Shield, FlaskConical, HardHat } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 
+type ZoneType = "light" | "heavy" | "entrance" | "surface";
+
 interface Room {
   id: string;
   name: string;
-  type: "control" | "research" | "containment" | "storage" | "medical" | "engineering" | "corridor";
+  shortName: string;
+  zone: ZoneType;
   status: "operational" | "warning" | "critical" | "offline";
-  personnel: number;
   x: number;
   y: number;
   width: number;
   height: number;
   connections: string[];
-  temperature?: number;
-  humidity?: number;
-  pressure?: number;
+  special?: "scp" | "checkpoint" | "elevator" | "tesla" | "nuke" | "servers" | "microhid";
+}
+
+interface PersonnelStats {
+  scps: number;
+  mtf: number;
+  scientists: number;
+  classD: number;
+  chaos: number;
 }
 
 export const FacilityMap = () => {
-  const [rooms, setRooms] = useState<Room[]>(() => {
-    const importedData = localStorage.getItem('facility_map_import');
-    if (importedData) {
-      localStorage.removeItem('facility_map_import');
-      toast.success("Design imported from Facility Planner!");
-      return JSON.parse(importedData);
-    }
-    return [
-      { id: "control", name: "Control Room", type: "control", status: "operational", personnel: 3, x: 300, y: 40, width: 140, height: 90, connections: ["corridor-1", "server"], temperature: 22, humidity: 45, pressure: 8247 },
-      { id: "server", name: "Server Bay", type: "storage", status: "operational", personnel: 0, x: 500, y: 40, width: 120, height: 90, connections: ["control", "corridor-2"], temperature: 18, humidity: 30, pressure: 8247 },
-      { id: "corridor-1", name: "Corridor A", type: "corridor", status: "operational", personnel: 0, x: 200, y: 150, width: 320, height: 50, connections: ["control", "corridor-3", "research-a"] },
-      { id: "corridor-2", name: "Corridor B", type: "corridor", status: "operational", personnel: 0, x: 520, y: 150, width: 160, height: 50, connections: ["server", "medical", "corridor-3"] },
-      { id: "corridor-3", name: "Main Corridor", type: "corridor", status: "operational", personnel: 1, x: 80, y: 250, width: 600, height: 50, connections: ["corridor-1", "corridor-2", "research-a", "research-b", "containment", "engineering"] },
-      { id: "research-a", name: "Research Lab A", type: "research", status: "operational", personnel: 2, x: 80, y: 350, width: 160, height: 110, connections: ["corridor-1", "corridor-3", "corridor-4"], temperature: 21, humidity: 50, pressure: 8247 },
-      { id: "research-b", name: "Research Lab B", type: "research", status: "warning", personnel: 1, x: 280, y: 350, width: 160, height: 110, connections: ["corridor-3", "containment", "corridor-4"], temperature: 23, humidity: 55, pressure: 8250 },
-      { id: "containment", name: "Containment Zone", type: "containment", status: "critical", personnel: 4, x: 480, y: 350, width: 200, height: 110, connections: ["corridor-3", "research-b", "storage"], temperature: 19, humidity: 40, pressure: 8260 },
-      { id: "corridor-4", name: "Corridor C", type: "corridor", status: "operational", personnel: 0, x: 80, y: 500, width: 400, height: 50, connections: ["research-a", "research-b", "medical", "engineering"] },
-      { id: "medical", name: "Medical Bay", type: "medical", status: "operational", personnel: 1, x: 520, y: 500, width: 160, height: 90, connections: ["corridor-2", "corridor-4"], temperature: 22, humidity: 45, pressure: 8247 },
-      { id: "engineering", name: "Engineering", type: "engineering", status: "operational", personnel: 3, x: 80, y: 600, width: 180, height: 110, connections: ["corridor-3", "corridor-4", "storage"], temperature: 25, humidity: 35, pressure: 8245 },
-      { id: "storage", name: "Storage Facility", type: "storage", status: "offline", personnel: 0, x: 320, y: 600, width: 360, height: 110, connections: ["containment", "engineering"], temperature: 15, humidity: 25, pressure: 8247 },
-    ];
-  });
-
-  const [selectedRoom, setSelectedRoom] = useState<Room>(rooms[0]);
+  const [selectedZone, setSelectedZone] = useState<ZoneType>("heavy");
+  const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
   const [entityEscaped, setEntityEscaped] = useState(false);
-  const [entityPosition, setEntityPosition] = useState({ x: 0, y: 0 });
+  const [playerPos, setPlayerPos] = useState({ x: 400, y: 300 });
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState(false);
   const [panStart, setPanStart] = useState({ x: 0, y: 0 });
-  const [showOverlay, setShowOverlay] = useState<"none" | "heat" | "personnel" | "status">("none");
   const mapRef = useRef<HTMLDivElement>(null);
+
+  const [personnel, setPersonnel] = useState<PersonnelStats>({
+    scps: 1,
+    mtf: 0,
+    scientists: 2,
+    classD: 3,
+    chaos: 0,
+  });
+
+  // Zone definitions
+  const zones: { id: ZoneType; name: string; color: string }[] = [
+    { id: "light", name: "Light Containment Zone", color: "bg-yellow-600" },
+    { id: "heavy", name: "Heavy Containment Zone", color: "bg-red-600" },
+    { id: "entrance", name: "Entrance Zone", color: "bg-blue-600" },
+    { id: "surface", name: "Surface Zone", color: "bg-green-600" },
+  ];
+
+  // Rooms per zone (SCP:SL inspired)
+  const rooms: Room[] = [
+    // Heavy Containment
+    { id: "hcz-049", name: "SCP-049 Containment", shortName: "SCP-049", zone: "heavy", status: "operational", x: 100, y: 100, width: 100, height: 80, connections: ["hcz-corridor-1"], special: "scp" },
+    { id: "hcz-106", name: "SCP-106 Containment", shortName: "SCP-106", zone: "heavy", status: "critical", x: 250, y: 100, width: 100, height: 80, connections: ["hcz-corridor-1", "hcz-corridor-2"], special: "scp" },
+    { id: "hcz-079", name: "SCP-079 Containment", shortName: "SCP-079", zone: "heavy", status: "operational", x: 400, y: 100, width: 100, height: 80, connections: ["hcz-corridor-2"], special: "scp" },
+    { id: "hcz-096", name: "SCP-096 Containment", shortName: "SCP-096", zone: "heavy", status: "warning", x: 550, y: 100, width: 100, height: 80, connections: ["hcz-corridor-3"], special: "scp" },
+    { id: "hcz-corridor-1", name: "HCZ Corridor Alpha", shortName: "CORRIDOR A", zone: "heavy", status: "operational", x: 100, y: 200, width: 250, height: 40, connections: ["hcz-049", "hcz-106", "hcz-tesla"] },
+    { id: "hcz-corridor-2", name: "HCZ Corridor Beta", shortName: "CORRIDOR B", zone: "heavy", status: "operational", x: 250, y: 260, width: 250, height: 40, connections: ["hcz-106", "hcz-079", "hcz-nuke"] },
+    { id: "hcz-corridor-3", name: "HCZ Corridor Gamma", shortName: "CORRIDOR G", zone: "heavy", status: "operational", x: 450, y: 200, width: 200, height: 40, connections: ["hcz-079", "hcz-096", "hcz-servers"] },
+    { id: "hcz-tesla", name: "Tesla Gate", shortName: "TESLA", zone: "heavy", status: "operational", x: 100, y: 320, width: 80, height: 60, connections: ["hcz-corridor-1", "hcz-elev-a"], special: "tesla" },
+    { id: "hcz-nuke", name: "Alpha Warhead", shortName: "NUKE", zone: "heavy", status: "offline", x: 300, y: 320, width: 100, height: 60, connections: ["hcz-corridor-2"], special: "nuke" },
+    { id: "hcz-servers", name: "Server Room", shortName: "SERVERS", zone: "heavy", status: "operational", x: 500, y: 320, width: 100, height: 60, connections: ["hcz-corridor-3"], special: "servers" },
+    { id: "hcz-microhid", name: "Micro H.I.D. Storage", shortName: "MICROHID", zone: "heavy", status: "operational", x: 500, y: 400, width: 100, height: 60, connections: ["hcz-servers"], special: "microhid" },
+    { id: "hcz-elev-a", name: "Elevator System A", shortName: "ELEV A", zone: "heavy", status: "operational", x: 100, y: 400, width: 80, height: 60, connections: ["hcz-tesla"], special: "elevator" },
+    { id: "hcz-elev-b", name: "Elevator System B", shortName: "ELEV B", zone: "heavy", status: "operational", x: 300, y: 400, width: 80, height: 60, connections: ["hcz-nuke"], special: "elevator" },
+    { id: "hcz-checkpoint", name: "HCZ/EZ Checkpoint", shortName: "CHECKPOINT", zone: "heavy", status: "operational", x: 200, y: 480, width: 180, height: 50, connections: ["hcz-elev-a", "hcz-elev-b"], special: "checkpoint" },
+
+    // Light Containment
+    { id: "lcz-173", name: "SCP-173 Containment", shortName: "SCP-173", zone: "light", status: "operational", x: 100, y: 100, width: 100, height: 80, connections: ["lcz-corridor-1"], special: "scp" },
+    { id: "lcz-914", name: "SCP-914", shortName: "SCP-914", zone: "light", status: "operational", x: 250, y: 100, width: 100, height: 80, connections: ["lcz-corridor-1"], special: "scp" },
+    { id: "lcz-corridor-1", name: "LCZ Corridor", shortName: "CORRIDOR", zone: "light", status: "operational", x: 100, y: 200, width: 350, height: 40, connections: ["lcz-173", "lcz-914", "lcz-armory"] },
+    { id: "lcz-armory", name: "LCZ Armory", shortName: "ARMORY", zone: "light", status: "operational", x: 450, y: 180, width: 100, height: 80, connections: ["lcz-corridor-1"] },
+    { id: "lcz-checkpoint", name: "LCZ/HCZ Checkpoint", shortName: "CHECKPOINT", zone: "light", status: "operational", x: 200, y: 300, width: 180, height: 50, connections: ["lcz-corridor-1"], special: "checkpoint" },
+
+    // Entrance Zone
+    { id: "ez-gate-a", name: "Gate A", shortName: "GATE A", zone: "entrance", status: "operational", x: 100, y: 100, width: 120, height: 80, connections: ["ez-corridor"], special: "checkpoint" },
+    { id: "ez-gate-b", name: "Gate B", shortName: "GATE B", zone: "entrance", status: "operational", x: 500, y: 100, width: 120, height: 80, connections: ["ez-corridor"], special: "checkpoint" },
+    { id: "ez-corridor", name: "EZ Main Corridor", shortName: "CORRIDOR", zone: "entrance", status: "operational", x: 100, y: 200, width: 520, height: 40, connections: ["ez-gate-a", "ez-gate-b", "ez-intercom"] },
+    { id: "ez-intercom", name: "Intercom Room", shortName: "INTERCOM", zone: "entrance", status: "operational", x: 300, y: 280, width: 100, height: 60, connections: ["ez-corridor"] },
+
+    // Surface
+    { id: "surf-helipad", name: "Helipad", shortName: "HELIPAD", zone: "surface", status: "operational", x: 200, y: 100, width: 150, height: 100, connections: ["surf-exit"] },
+    { id: "surf-exit", name: "Facility Exit", shortName: "EXIT", zone: "surface", status: "operational", x: 300, y: 250, width: 100, height: 60, connections: ["surf-helipad", "surf-escape"] },
+    { id: "surf-escape", name: "Escape Route", shortName: "ESCAPE", zone: "surface", status: "operational", x: 300, y: 350, width: 100, height: 60, connections: ["surf-exit"] },
+  ];
+
+  const currentZoneRooms = rooms.filter(r => r.zone === selectedZone);
 
   useEffect(() => {
     const checkForEscape = () => {
       if (Math.random() < 0.01) {
         setEntityEscaped(true);
-        setEntityPosition({
-          x: 530 + Math.random() * 100,
-          y: 380 + Math.random() * 50
-        });
-        setRooms(prev => prev.map(r => 
-          r.id === "containment" ? { ...r, status: "critical" } : r
-        ));
-        toast.error("🚨 CONTAINMENT BREACH DETECTED!", { duration: 10000 });
+        setPersonnel(p => ({ ...p, scps: p.scps + 1 }));
+        toast.error("🚨 CONTAINMENT BREACH - SCP-106 HAS ESCAPED!", { duration: 10000 });
       }
     };
     const interval = setInterval(checkForEscape, 300000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Randomize personnel counts occasionally
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setPersonnel(p => ({
+        scps: Math.max(0, p.scps + (Math.random() < 0.3 ? (Math.random() < 0.5 ? -1 : 1) : 0)),
+        mtf: Math.max(0, Math.min(12, p.mtf + (Math.random() < 0.3 ? Math.floor(Math.random() * 3) - 1 : 0))),
+        scientists: Math.max(0, Math.min(8, p.scientists + (Math.random() < 0.3 ? Math.floor(Math.random() * 3) - 1 : 0))),
+        classD: Math.max(0, Math.min(10, p.classD + (Math.random() < 0.3 ? Math.floor(Math.random() * 3) - 1 : 0))),
+        chaos: Math.max(0, Math.min(5, p.chaos + (Math.random() < 0.2 ? Math.floor(Math.random() * 2) : 0))),
+      }));
+    }, 15000);
     return () => clearInterval(interval);
   }, []);
 
@@ -92,78 +140,25 @@ export const FacilityMap = () => {
 
   const handlePanEnd = () => setIsPanning(false);
 
-  const getStatusColor = (status: string, forOverlay = false) => {
-    const colors = {
-      operational: forOverlay ? "rgba(0, 217, 255, 0.4)" : "bg-primary/30 border-primary",
-      warning: forOverlay ? "rgba(234, 179, 8, 0.4)" : "bg-yellow-500/30 border-yellow-500",
-      critical: forOverlay ? "rgba(239, 68, 68, 0.5)" : "bg-destructive/30 border-destructive",
-      offline: forOverlay ? "rgba(100, 100, 100, 0.3)" : "bg-muted/30 border-muted-foreground",
-    };
-    return colors[status as keyof typeof colors] || colors.offline;
-  };
-
-  const getStatusIcon = (status: string) => {
+  const getStatusColor = (status: string) => {
     switch (status) {
-      case "operational": return <CheckCircle className="w-4 h-4 text-primary" />;
-      case "warning": return <AlertTriangle className="w-4 h-4 text-yellow-500" />;
-      case "critical": return <AlertTriangle className="w-4 h-4 text-destructive animate-pulse" />;
-      case "offline": return <XCircle className="w-4 h-4 text-muted-foreground" />;
-      default: return <Activity className="w-4 h-4" />;
+      case "operational": return "border-[#00ff88]/60 bg-[#00ff88]/10";
+      case "warning": return "border-yellow-500/60 bg-yellow-500/20";
+      case "critical": return "border-red-500/60 bg-red-500/20 animate-pulse";
+      case "offline": return "border-gray-500/40 bg-gray-500/10";
+      default: return "border-gray-500/40 bg-gray-500/10";
     }
   };
 
-  const getHeatColor = (temp?: number) => {
-    if (!temp) return "rgba(100, 100, 100, 0.3)";
-    if (temp < 18) return "rgba(59, 130, 246, 0.5)";
-    if (temp < 22) return "rgba(34, 197, 94, 0.4)";
-    if (temp < 25) return "rgba(234, 179, 8, 0.4)";
-    return "rgba(239, 68, 68, 0.5)";
-  };
-
-  const getPersonnelColor = (count: number) => {
-    if (count === 0) return "rgba(100, 100, 100, 0.2)";
-    if (count < 2) return "rgba(0, 217, 255, 0.3)";
-    if (count < 4) return "rgba(34, 197, 94, 0.4)";
-    return "rgba(234, 179, 8, 0.5)";
-  };
-
-  const getRoomOverlayColor = (room: Room) => {
-    switch (showOverlay) {
-      case "heat": return getHeatColor(room.temperature);
-      case "personnel": return getPersonnelColor(room.personnel);
-      case "status": return getStatusColor(room.status, true);
-      default: return undefined;
+  const getSpecialIcon = (special?: string) => {
+    switch (special) {
+      case "scp": return <Skull className="w-3 h-3 text-red-400" />;
+      case "checkpoint": return <Shield className="w-3 h-3 text-blue-400" />;
+      case "elevator": return <span className="text-[10px] text-cyan-400">▲▼</span>;
+      case "tesla": return <span className="text-[10px] text-yellow-400">⚡</span>;
+      case "nuke": return <span className="text-[10px] text-red-400">☢</span>;
+      default: return null;
     }
-  };
-
-  const renderConnections = () => {
-    const connections: JSX.Element[] = [];
-    const processed = new Set<string>();
-
-    rooms.forEach(room => {
-      room.connections.forEach(connId => {
-        const connRoom = rooms.find(r => r.id === connId);
-        if (connRoom) {
-          const key = [room.id, connRoom.id].sort().join("-");
-          if (!processed.has(key)) {
-            processed.add(key);
-            connections.push(
-              <line
-                key={key}
-                x1={room.x + room.width / 2}
-                y1={room.y + room.height / 2}
-                x2={connRoom.x + connRoom.width / 2}
-                y2={connRoom.y + connRoom.height / 2}
-                stroke="rgba(0, 217, 255, 0.15)"
-                strokeWidth="2"
-                strokeDasharray="8,4"
-              />
-            );
-          }
-        }
-      });
-    });
-    return connections;
   };
 
   const handleExport = () => {
@@ -177,101 +172,87 @@ export const FacilityMap = () => {
     toast.success("Map exported!");
   };
 
-  const totalPersonnel = rooms.reduce((sum, r) => sum + r.personnel, 0);
-  const criticalRooms = rooms.filter(r => r.status === "critical").length;
-  const warningRooms = rooms.filter(r => r.status === "warning").length;
+  const renderConnections = () => {
+    const connections: JSX.Element[] = [];
+    const processed = new Set<string>();
+
+    currentZoneRooms.forEach(room => {
+      room.connections.forEach(connId => {
+        const connRoom = currentZoneRooms.find(r => r.id === connId);
+        if (connRoom) {
+          const key = [room.id, connRoom.id].sort().join("-");
+          if (!processed.has(key)) {
+            processed.add(key);
+            connections.push(
+              <line
+                key={key}
+                x1={room.x + room.width / 2}
+                y1={room.y + room.height / 2}
+                x2={connRoom.x + connRoom.width / 2}
+                y2={connRoom.y + connRoom.height / 2}
+                stroke="rgba(0, 255, 136, 0.2)"
+                strokeWidth="3"
+              />
+            );
+          }
+        }
+      });
+    });
+    return connections;
+  };
 
   return (
-    <div className="flex h-full bg-background">
+    <div className="flex h-full bg-[#0a0a12]">
       {/* Map View */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Toolbar */}
-        <div className="border-b border-border bg-muted/30 p-3 flex items-center gap-2 flex-wrap">
-          <div className="flex items-center gap-2">
-            <MapPin className="w-5 h-5 text-primary" />
-            <h2 className="font-bold">FACILITY SCHEMATIC</h2>
+        {/* Stats Panel - Top */}
+        <div className="bg-[#0d0d18] border-b border-[#1a1a2e] px-4 py-3 flex items-center gap-8">
+          <div className="flex items-center gap-2 text-xs">
+            <Skull className="w-4 h-4 text-red-500" />
+            <span className="text-muted-foreground">SCPs:</span>
+            <span className="font-bold text-red-400">{personnel.scps}</span>
+          </div>
+          <div className="flex items-center gap-2 text-xs">
+            <Shield className="w-4 h-4 text-blue-400" />
+            <span className="text-muted-foreground">MTF & Guards:</span>
+            <span className="font-bold text-blue-400">{personnel.mtf}</span>
+          </div>
+          <div className="flex items-center gap-2 text-xs">
+            <FlaskConical className="w-4 h-4 text-white" />
+            <span className="text-muted-foreground">Scientists:</span>
+            <span className="font-bold text-white">{personnel.scientists}</span>
+          </div>
+          <div className="flex items-center gap-2 text-xs">
+            <HardHat className="w-4 h-4 text-orange-400" />
+            <span className="text-muted-foreground">Class-D:</span>
+            <span className="font-bold text-orange-400">{personnel.classD}</span>
+          </div>
+          <div className="flex items-center gap-2 text-xs">
+            <Users className="w-4 h-4 text-green-400" />
+            <span className="text-muted-foreground">Chaos Insurgents:</span>
+            <span className="font-bold text-green-400">{personnel.chaos}</span>
           </div>
           
-          <div className="h-6 w-px bg-border mx-2" />
-          
-          <div className="flex gap-1">
-            <Button
-              size="sm"
-              variant={showOverlay === "none" ? "default" : "outline"}
-              onClick={() => setShowOverlay("none")}
-            >
-              <Eye className="w-4 h-4 mr-1" />
-              Default
+          <div className="ml-auto flex gap-1">
+            <Button size="sm" variant="ghost" onClick={handleExport} className="h-7 px-2">
+              <Download className="w-3 h-3" />
             </Button>
-            <Button
-              size="sm"
-              variant={showOverlay === "heat" ? "default" : "outline"}
-              onClick={() => setShowOverlay("heat")}
-            >
-              <Thermometer className="w-4 h-4 mr-1" />
-              Thermal
+            <Button size="sm" variant="ghost" onClick={() => handleZoom(0.1)} className="h-7 px-2">
+              <ZoomIn className="w-3 h-3" />
             </Button>
-            <Button
-              size="sm"
-              variant={showOverlay === "personnel" ? "default" : "outline"}
-              onClick={() => setShowOverlay("personnel")}
-            >
-              <Users className="w-4 h-4 mr-1" />
-              Personnel
+            <Button size="sm" variant="ghost" onClick={() => handleZoom(-0.1)} className="h-7 px-2">
+              <ZoomOut className="w-3 h-3" />
             </Button>
-            <Button
-              size="sm"
-              variant={showOverlay === "status" ? "default" : "outline"}
-              onClick={() => setShowOverlay("status")}
-            >
-              <Shield className="w-4 h-4 mr-1" />
-              Status
+            <Button size="sm" variant="ghost" onClick={() => { setZoom(1); setPan({ x: 0, y: 0 }); }} className="h-7 px-2">
+              <RotateCcw className="w-3 h-3" />
             </Button>
-          </div>
-
-          <div className="flex gap-1 ml-auto">
-            <Button size="sm" variant="outline" onClick={handleExport}>
-              <Download className="w-4 h-4" />
-            </Button>
-            <Button size="sm" variant="outline" onClick={() => handleZoom(0.1)}>
-              <ZoomIn className="w-4 h-4" />
-            </Button>
-            <Button size="sm" variant="outline" onClick={() => handleZoom(-0.1)}>
-              <ZoomOut className="w-4 h-4" />
-            </Button>
-            <Button size="sm" variant="outline" onClick={() => { setZoom(1); setPan({ x: 0, y: 0 }); }}>
-              <RotateCcw className="w-4 h-4" />
-            </Button>
-          </div>
-        </div>
-
-        {/* Stats Bar */}
-        <div className="border-b border-border bg-black/40 px-4 py-2 flex items-center gap-6 text-xs">
-          <div className="flex items-center gap-2">
-            <Users className="w-4 h-4 text-primary" />
-            <span className="text-muted-foreground">Personnel:</span>
-            <span className="font-bold text-primary">{totalPersonnel}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 text-destructive" />
-            <span className="text-muted-foreground">Critical:</span>
-            <span className="font-bold text-destructive">{criticalRooms}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 text-yellow-500" />
-            <span className="text-muted-foreground">Warnings:</span>
-            <span className="font-bold text-yellow-500">{warningRooms}</span>
-          </div>
-          <div className="ml-auto flex items-center gap-2">
-            <Radio className="w-4 h-4 text-primary animate-pulse" />
-            <span className="text-primary font-mono">DEPTH: 8,247m</span>
           </div>
         </div>
 
         {/* Map Canvas */}
         <div 
           ref={mapRef}
-          className="flex-1 overflow-hidden relative bg-black/60"
+          className="flex-1 overflow-hidden relative bg-[#06060c]"
           onMouseDown={handlePanStart}
           onMouseMove={handlePanMove}
           onMouseUp={handlePanEnd}
@@ -288,224 +269,208 @@ export const FacilityMap = () => {
           >
             {/* Grid */}
             <div 
-              className="absolute opacity-10 pointer-events-none"
+              className="absolute opacity-20 pointer-events-none"
               style={{
-                width: '900px',
-                height: '800px',
+                width: '800px',
+                height: '600px',
                 backgroundImage: `
-                  linear-gradient(0deg, transparent 24%, rgba(0, 217, 255, 0.2) 25%, rgba(0, 217, 255, 0.2) 26%, transparent 27%, transparent 74%, rgba(0, 217, 255, 0.2) 75%, rgba(0, 217, 255, 0.2) 76%, transparent 77%, transparent),
-                  linear-gradient(90deg, transparent 24%, rgba(0, 217, 255, 0.2) 25%, rgba(0, 217, 255, 0.2) 26%, transparent 27%, transparent 74%, rgba(0, 217, 255, 0.2) 75%, rgba(0, 217, 255, 0.2) 76%, transparent 77%, transparent)
+                  linear-gradient(rgba(0, 255, 136, 0.1) 1px, transparent 1px),
+                  linear-gradient(90deg, rgba(0, 255, 136, 0.1) 1px, transparent 1px)
                 `,
-                backgroundSize: '50px 50px'
+                backgroundSize: '40px 40px'
               }}
             />
 
             {/* Connections */}
-            <svg className="absolute pointer-events-none" style={{ width: '900px', height: '800px' }}>
+            <svg className="absolute pointer-events-none" style={{ width: '800px', height: '600px' }}>
               {renderConnections()}
             </svg>
 
             {/* Rooms */}
-            {rooms.map((room) => (
+            {currentZoneRooms.map((room) => (
               <div
                 key={room.id}
                 onClick={() => setSelectedRoom(room)}
-                className={`absolute cursor-pointer transition-all rounded-lg border-2 ${
-                  showOverlay === "none" ? getStatusColor(room.status) : "border-white/20"
-                } ${selectedRoom.id === room.id ? "ring-2 ring-white shadow-lg shadow-primary/30" : ""} 
-                hover:brightness-125`}
+                className={`absolute cursor-pointer transition-all border-2 ${getStatusColor(room.status)} ${
+                  selectedRoom?.id === room.id ? "ring-2 ring-white/50" : ""
+                } hover:brightness-125`}
                 style={{
                   left: `${room.x}px`,
                   top: `${room.y}px`,
                   width: `${room.width}px`,
                   height: `${room.height}px`,
-                  backgroundColor: getRoomOverlayColor(room) || undefined,
                 }}
               >
-                <div className="flex flex-col h-full justify-between p-2">
-                  <div className="flex items-start justify-between gap-1">
-                    {getStatusIcon(room.status)}
-                    {room.personnel > 0 && (
-                      <div className="flex items-center gap-1 text-xs bg-black/40 rounded px-1">
-                        <Users className="w-3 h-3" />
-                        <span>{room.personnel}</span>
-                      </div>
+                <div className="flex flex-col h-full justify-between p-1.5">
+                  <div className="flex items-start justify-between">
+                    {getSpecialIcon(room.special)}
+                    {room.status === "critical" && (
+                      <AlertTriangle className="w-3 h-3 text-red-500 animate-pulse" />
                     )}
                   </div>
-                  <div className="text-xs font-bold leading-tight bg-black/40 rounded px-1 py-0.5 text-center">
-                    {room.name}
+                  <div className="text-[9px] font-bold text-white/90 text-center leading-tight uppercase tracking-wide">
+                    {room.shortName}
                   </div>
                 </div>
               </div>
             ))}
 
-            {/* Entity */}
+            {/* Player Position Crosshair */}
+            <div
+              className="absolute pointer-events-none z-50"
+              style={{
+                left: `${playerPos.x}px`,
+                top: `${playerPos.y}px`,
+                transform: 'translate(-50%, -50%)'
+              }}
+            >
+              <Crosshair className="w-6 h-6 text-[#00ff88] drop-shadow-lg" />
+            </div>
+
+            {/* Entity indicator when escaped */}
             {entityEscaped && (
               <div
-                className="absolute w-10 h-10 bg-destructive rounded-full animate-pulse flex items-center justify-center text-2xl z-50"
+                className="absolute w-8 h-8 bg-red-600/80 rounded-full animate-pulse flex items-center justify-center text-lg z-40"
                 style={{
-                  left: `${entityPosition.x}px`,
-                  top: `${entityPosition.y}px`,
-                  filter: "drop-shadow(0 0 15px rgba(239, 68, 68, 0.9))"
+                  left: `${180 + Math.random() * 200}px`,
+                  top: `${150 + Math.random() * 150}px`,
+                  filter: "drop-shadow(0 0 10px rgba(239, 68, 68, 0.8))"
                 }}
               >
-                👁️
+                <Skull className="w-4 h-4 text-white" />
               </div>
             )}
           </div>
 
           {/* Legend */}
-          <div className="absolute bottom-4 left-4 glass-panel p-3 text-xs space-y-2 z-10">
-            <div className="font-bold mb-2">LEGEND</div>
+          <div className="absolute bottom-4 left-4 bg-[#0d0d18]/90 border border-[#1a1a2e] p-3 text-[10px] space-y-1.5 z-10">
+            <div className="font-bold text-xs mb-2 text-white/80">LEGEND</div>
             <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-primary/30 border border-primary rounded" />
-              <span>Operational</span>
+              <div className="w-3 h-3 border border-[#00ff88]/60 bg-[#00ff88]/10" />
+              <span className="text-muted-foreground">Operational</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-yellow-500/30 border border-yellow-500 rounded" />
-              <span>Warning</span>
+              <div className="w-3 h-3 border border-yellow-500/60 bg-yellow-500/20" />
+              <span className="text-muted-foreground">Warning</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-destructive/30 border border-destructive rounded" />
-              <span>Critical</span>
+              <div className="w-3 h-3 border border-red-500/60 bg-red-500/20" />
+              <span className="text-muted-foreground">Critical</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-muted/30 border border-muted-foreground rounded" />
-              <span>Offline</span>
+              <div className="w-3 h-3 border border-gray-500/40 bg-gray-500/10" />
+              <span className="text-muted-foreground">Offline</span>
             </div>
           </div>
 
           {/* Controls hint */}
-          <div className="absolute bottom-4 right-4 glass-panel px-3 py-2 text-xs text-muted-foreground z-10">
+          <div className="absolute bottom-4 right-4 bg-[#0d0d18]/90 border border-[#1a1a2e] px-3 py-2 text-[10px] text-muted-foreground z-10">
             <Move className="w-3 h-3 inline mr-1" />
             Shift+Drag to pan
           </div>
         </div>
       </div>
 
-      {/* Details Panel */}
-      <div className="w-80 border-l border-border flex flex-col bg-black/20">
-        <div className="p-4 border-b border-border bg-gradient-to-r from-primary/5 to-transparent">
-          <div className="flex items-center gap-2 mb-2">
-            {getStatusIcon(selectedRoom.status)}
-            <h3 className="font-bold text-lg">{selectedRoom.name}</h3>
+      {/* Right Sidebar - Zones */}
+      <div className="w-56 border-l border-[#1a1a2e] bg-[#0d0d18] flex flex-col">
+        <div className="p-4 border-b border-[#1a1a2e]">
+          <div className="flex items-center gap-2 mb-3">
+            <MapPin className="w-4 h-4 text-[#00ff88]" />
+            <h2 className="font-bold text-sm">FACILITY ZONES</h2>
           </div>
-          <div className="text-xs text-muted-foreground uppercase tracking-wider">
-            {selectedRoom.type.replace("-", " ")}
+          
+          <div className="space-y-2">
+            {zones.map(zone => (
+              <button
+                key={zone.id}
+                onClick={() => { setSelectedZone(zone.id); setSelectedRoom(null); }}
+                className={`w-full text-left p-3 rounded transition-all text-xs font-medium ${
+                  selectedZone === zone.id 
+                    ? `${zone.color} text-white` 
+                    : "bg-[#1a1a2e] hover:bg-[#252536] text-muted-foreground"
+                }`}
+              >
+                {zone.name}
+              </button>
+            ))}
           </div>
         </div>
 
+        {/* Selected Room Details */}
         <ScrollArea className="flex-1">
-          <div className="p-4 space-y-4">
-            {/* Status */}
-            <div className="glass-panel p-3">
-              <div className="text-xs text-muted-foreground mb-2">STATUS</div>
-              <div className={`font-bold uppercase text-lg ${
-                selectedRoom.status === "operational" ? "text-primary" :
-                selectedRoom.status === "warning" ? "text-yellow-500" :
-                selectedRoom.status === "critical" ? "text-destructive" :
-                "text-muted-foreground"
-              }`}>
-                {selectedRoom.status}
-              </div>
-            </div>
-
-            {/* Environmental */}
-            {selectedRoom.temperature && (
-              <div className="glass-panel p-3 space-y-3">
-                <div className="text-xs text-muted-foreground">ENVIRONMENTAL</div>
-                <div className="grid grid-cols-3 gap-2">
-                  <div className="text-center">
-                    <Thermometer className="w-4 h-4 mx-auto mb-1 text-primary" />
-                    <div className="text-sm font-bold">{selectedRoom.temperature}°C</div>
-                    <div className="text-xs text-muted-foreground">Temp</div>
-                  </div>
-                  <div className="text-center">
-                    <Droplets className="w-4 h-4 mx-auto mb-1 text-blue-400" />
-                    <div className="text-sm font-bold">{selectedRoom.humidity}%</div>
-                    <div className="text-xs text-muted-foreground">Humidity</div>
-                  </div>
-                  <div className="text-center">
-                    <Wind className="w-4 h-4 mx-auto mb-1 text-cyan-400" />
-                    <div className="text-sm font-bold">{selectedRoom.pressure}</div>
-                    <div className="text-xs text-muted-foreground">PSI</div>
+          <div className="p-4">
+            {selectedRoom ? (
+              <div className="space-y-4">
+                <div>
+                  <div className="font-bold text-sm">{selectedRoom.name}</div>
+                  <div className="text-[10px] text-muted-foreground uppercase tracking-wider">
+                    {zones.find(z => z.id === selectedRoom.zone)?.name}
                   </div>
                 </div>
-              </div>
-            )}
 
-            {/* Personnel */}
-            <div className="glass-panel p-3">
-              <div className="text-xs text-muted-foreground mb-2">PERSONNEL</div>
-              <div className="flex items-center gap-2">
-                <Users className="w-5 h-5 text-primary" />
-                <span className="font-bold text-lg">{selectedRoom.personnel}</span>
-                <span className="text-muted-foreground">active</span>
-              </div>
-            </div>
-
-            {/* Connections */}
-            <div className="glass-panel p-3">
-              <div className="text-xs text-muted-foreground mb-2">CONNECTED AREAS</div>
-              <div className="space-y-1">
-                {selectedRoom.connections.map(connId => {
-                  const connRoom = rooms.find(r => r.id === connId);
-                  return connRoom ? (
-                    <div 
-                      key={connId}
-                      onClick={() => setSelectedRoom(connRoom)}
-                      className="text-xs p-2 bg-white/5 rounded hover:bg-primary/20 cursor-pointer transition-colors flex items-center justify-between"
-                    >
-                      <span>{connRoom.name}</span>
-                      {getStatusIcon(connRoom.status)}
-                    </div>
-                  ) : null;
-                })}
-              </div>
-            </div>
-
-            {/* Alerts */}
-            {selectedRoom.status === "critical" && (
-              <div className="glass-panel p-3 border-destructive/30 bg-destructive/10">
-                <div className="flex items-start gap-2">
-                  <AlertTriangle className="w-5 h-5 text-destructive flex-shrink-0 animate-pulse" />
-                  <div>
-                    <div className="font-bold text-destructive mb-1">CRITICAL ALERT</div>
-                    <div className="text-xs text-muted-foreground">
-                      {selectedRoom.type === "containment" 
-                        ? "Containment breach detected. Z-13 specimen showing unusual behavior."
-                        : "System malfunction. Immediate maintenance required."}
-                    </div>
+                <div className="p-3 bg-[#1a1a2e] rounded">
+                  <div className="text-[10px] text-muted-foreground mb-1">STATUS</div>
+                  <div className={`font-bold uppercase text-sm ${
+                    selectedRoom.status === "operational" ? "text-[#00ff88]" :
+                    selectedRoom.status === "warning" ? "text-yellow-400" :
+                    selectedRoom.status === "critical" ? "text-red-400" :
+                    "text-gray-400"
+                  }`}>
+                    {selectedRoom.status}
                   </div>
                 </div>
-              </div>
-            )}
 
-            {selectedRoom.status === "warning" && (
-              <div className="glass-panel p-3 border-yellow-500/30 bg-yellow-500/10">
-                <div className="flex items-start gap-2">
-                  <AlertTriangle className="w-5 h-5 text-yellow-500 flex-shrink-0" />
-                  <div>
-                    <div className="font-bold text-yellow-500 mb-1">WARNING</div>
-                    <div className="text-xs text-muted-foreground">
-                      Minor anomalies detected. Monitoring situation.
+                {selectedRoom.special && (
+                  <div className="p-3 bg-[#1a1a2e] rounded">
+                    <div className="text-[10px] text-muted-foreground mb-1">TYPE</div>
+                    <div className="font-bold uppercase text-sm text-primary">
+                      {selectedRoom.special}
                     </div>
                   </div>
+                )}
+
+                <div className="p-3 bg-[#1a1a2e] rounded">
+                  <div className="text-[10px] text-muted-foreground mb-2">CONNECTED TO</div>
+                  <div className="space-y-1">
+                    {selectedRoom.connections.map(connId => {
+                      const connRoom = rooms.find(r => r.id === connId);
+                      return connRoom ? (
+                        <button
+                          key={connId}
+                          onClick={() => setSelectedRoom(connRoom)}
+                          className="w-full text-left text-[10px] p-2 bg-black/30 rounded hover:bg-primary/20 transition-colors"
+                        >
+                          {connRoom.shortName}
+                        </button>
+                      ) : null;
+                    })}
+                  </div>
                 </div>
+
+                {selectedRoom.status === "critical" && (
+                  <div className="p-3 bg-red-500/20 border border-red-500/40 rounded">
+                    <div className="flex items-center gap-2">
+                      <AlertTriangle className="w-4 h-4 text-red-400 animate-pulse" />
+                      <span className="text-[10px] font-bold text-red-400">BREACH DETECTED</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="text-center text-muted-foreground text-xs py-8">
+                Select a room to view details
               </div>
             )}
 
             {entityEscaped && (
-              <div className="glass-panel p-3 border-destructive/50 bg-destructive/20 animate-pulse">
-                <div className="flex items-start gap-2">
-                  <AlertTriangle className="w-5 h-5 text-destructive flex-shrink-0" />
-                  <div>
-                    <div className="font-bold text-destructive mb-1">🚨 ENTITY BREACH</div>
-                    <div className="text-xs text-destructive/80">
-                      Z-13 has escaped containment! Activate CODE-BLACK lockdown immediately!
-                    </div>
-                  </div>
+              <div className="mt-4 p-3 bg-red-500/20 border border-red-500/40 rounded animate-pulse">
+                <div className="flex items-center gap-2 mb-2">
+                  <Skull className="w-4 h-4 text-red-400" />
+                  <span className="text-xs font-bold text-red-400">SCP BREACH</span>
                 </div>
+                <p className="text-[10px] text-red-300">
+                  SCP-106 has breached containment. All personnel proceed to nearest checkpoint.
+                </p>
               </div>
             )}
           </div>

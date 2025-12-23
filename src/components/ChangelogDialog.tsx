@@ -2,12 +2,12 @@ import { useEffect, useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Sparkles, Check, Cloud, PartyPopper, Rocket, Zap, Shield, Monitor, Star, ArrowRight, Info } from "lucide-react";
+import { Sparkles, Check, Cloud, PartyPopper, Rocket, Zap, Shield, Monitor, Star, ArrowRight, Info, Paintbrush } from "lucide-react";
 
 export const ChangelogDialog = () => {
   const [open, setOpen] = useState(false);
-  const [selectedVersion, setSelectedVersion] = useState("2.8");
-  const currentVersion = "2.8";
+  const [selectedVersion, setSelectedVersion] = useState("2.9");
+  const currentVersion = "2.9";
 
   useEffect(() => {
     const lastSeenVersion = localStorage.getItem("urbanshade_last_seen_version");
@@ -30,6 +30,36 @@ export const ChangelogDialog = () => {
   }
 
   const changelogs: Record<string, VersionData> = {
+    "2.9": {
+      icon: <Paintbrush className="w-5 h-5" />,
+      color: "from-purple-500 to-pink-600",
+      tagline: "Smol Update",
+      overview: "Visual refresh! Redesigned boot screen with CRT terminal effects, overhauled Facility Map with SCP:SL-inspired zone navigation, revamped Security Cameras with Breach Scanner mode, and Admin Panel now requires authentication.",
+      sections: {
+        "Visual Redesign": [
+          "Boot screen: CRT terminal aesthetic with scanlines and green phosphor text",
+          "Facility Map: Zone-based layout inspired by SCP:SL control displays",
+          "Security Cameras: Industrial breach scanner panel design",
+          "Changelog scrolling bug fixed"
+        ],
+        "Facility Map": [
+          "Zone toggles: Light Containment, Heavy Containment, Entrance, Surface",
+          "Stats panel: Personnel counts by type (SCPs, MTF, Scientists, Class-D)",
+          "Tactical map display with room labels and connections",
+          "Crosshair player position indicator"
+        ],
+        "Security Cameras": [
+          "Breach Scanner mode with zone detection controls",
+          "Team detection filters (Class-D, Scientists, Foundation, Chaos)",
+          "Power and tier indicators with simulated scanning",
+          "Industrial control panel aesthetic"
+        ],
+        "Admin Panel": [
+          "Now requires authentication instead of instant access",
+          "Password prompt before entering admin mode"
+        ]
+      }
+    },
     "2.8": {
       icon: <Rocket className="w-5 h-5" />,
       color: "from-cyan-500 to-blue-600",
@@ -149,8 +179,8 @@ export const ChangelogDialog = () => {
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-5xl h-[85vh] p-0 overflow-hidden animate-scale-in bg-background border-border/50 gap-0">
-        <div className="flex h-full">
+      <DialogContent className="max-w-5xl h-[85vh] p-0 overflow-hidden animate-scale-in bg-background border-border/50 gap-0 flex flex-col">
+        <div className="flex h-full min-h-0 flex-1">
           {/* Left Sidebar - Version List */}
           <div className="w-64 bg-muted/30 border-r border-border/50 flex flex-col">
             {/* Header */}
@@ -214,7 +244,7 @@ export const ChangelogDialog = () => {
           </div>
 
           {/* Right Content - Changelog Details */}
-          <div className="flex-1 flex flex-col min-h-0">
+          <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
             {/* Version Header */}
             <div className={`relative px-8 py-8 bg-gradient-to-br ${versionData?.color || "from-primary to-primary/60"} overflow-hidden shrink-0`}>
               <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMzRjMC0yIDItNCAyLTRzLTItMi00LTJjLTQgMC00IDQtNCA0czAgNCA0IDRjMiAwIDItMiAyLTJ6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-30" />
