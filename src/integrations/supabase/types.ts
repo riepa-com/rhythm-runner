@@ -146,6 +146,30 @@ export type Database = {
         }
         Relationships: []
       }
+      site_status: {
+        Row: {
+          id: string
+          message: string | null
+          status: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          id: string
+          message?: string | null
+          status?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          id?: string
+          message?: string | null
+          status?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       synced_settings: {
         Row: {
           created_at: string

@@ -5,6 +5,7 @@ import { loadState } from "@/lib/persistence";
 import { Link } from "react-router-dom";
 import { actionDispatcher } from "@/lib/actionDispatcher";
 import { commandQueue, parseTerminalCommand, TERMINAL_COMMANDS, TerminalResult } from "@/lib/commandQueue";
+import SupabaseConnectivityChecker from "@/components/SupabaseConnectivityChecker";
 
 interface LogEntry {
   id: number;
@@ -1475,6 +1476,7 @@ const DevMode = () => {
           </div>
         )}
       </div>
+      <SupabaseConnectivityChecker currentRoute="def-dev" />
     </div>
   );
 };

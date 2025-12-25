@@ -24,6 +24,7 @@ import { BugcheckScreen, createBugcheck, BugcheckData } from "@/components/Bugch
 import { actionDispatcher } from "@/lib/actionDispatcher";
 import { systemBus } from "@/lib/systemBus";
 import { commandQueue, QueuedCommand } from "@/lib/commandQueue";
+import SupabaseConnectivityChecker from "@/components/SupabaseConnectivityChecker";
 
 const Index = () => {
   const [adminSetupComplete, setAdminSetupComplete] = useState(false);
@@ -679,6 +680,7 @@ const Index = () => {
         />
       )}
       {devModeOpen && <DevModeConsole onClose={() => setDevModeOpen(false)} />}
+      <SupabaseConnectivityChecker currentRoute="main" />
     </>
   );
 };

@@ -28,6 +28,7 @@ import UURDocs from "./pages/docs/UUR";
 import Features from "./pages/docs/Features";
 import NotFound from "./pages/NotFound";
 import ModerationPanel from "./pages/ModerationPanel";
+import StatusPage from "./pages/Status";
 
 // Account Manager pages
 import AccManageLayout from "./pages/acc-manage/Layout";
@@ -86,6 +87,9 @@ const App = () => (
         
         {/* Moderation Panel - Admin only */}
         <Route path="/moderation" element={<ModerationPanel />} />
+        
+        {/* Status Page */}
+        <Route path="/status" element={<StatusPage />} />
         
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />

@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Shield, Users, AlertTriangle, Ban, Clock, Search, RefreshCw, XCircle, CheckCircle, Skull, FileText, PartyPopper } from "lucide-react";
+import { Shield, Users, AlertTriangle, Ban, Clock, Search, RefreshCw, XCircle, CheckCircle, Skull, FileText, PartyPopper, Activity, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -26,6 +27,101 @@ interface UserData {
   created_at: string;
 }
 
+interface StatusEntry {
+  id: string;
+  status: string;
+  message: string | null;
+}
+
+const routeLabels: Record<string, string> = {
+  'main': 'Main Site',
+  'docs': 'Documentation',
+  'def-dev': 'DefDev Mode',
+  'entire-site': 'Entire Site (Global)'
+};
+
+const StatusCard = ({ status, onUpdate }: { status: StatusEntry; onUpdate: (id: string, status: string, message: string | null) => void }) => {
+  const [editing, setEditing] = useState(false);
+  const [newStatus, setNewStatus] = useState(status.status);
+  const [newMessage, setNewMessage] = useState(status.message || '');
+
+  const handleSave = () => {
+    onUpdate(status.id, newStatus, newMessage || null);
+    setEditing(false);
+  };
+
+  const getStatusColor = (s: string) => {
+    switch (s) {
+      case 'online': return 'bg-green-500/20 border-green-500/30 text-green-400';
+      case 'maintenance': return 'bg-amber-500/20 border-amber-500/30 text-amber-400';
+      case 'offline': return 'bg-red-500/20 border-red-500/30 text-red-400';
+      default: return 'bg-gray-500/20 border-gray-500/30 text-gray-400';
+    }
+  };
+
+  return (
+    <div className={`p-5 rounded-xl border transition-all ${getStatusColor(status.status)}`}>
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h4 className="font-bold text-lg">{routeLabels[status.id] || status.id}</h4>
+          <span className="text-xs opacity-70">ID: {status.id}</span>
+        </div>
+        <span className={`px-3 py-1 rounded-full text-sm font-bold uppercase ${
+          status.status === 'online' ? 'bg-green-500/30' :
+          status.status === 'maintenance' ? 'bg-amber-500/30' :
+          'bg-red-500/30'
+        }`}>
+          {status.status}
+        </span>
+      </div>
+
+      {editing ? (
+        <div className="space-y-3">
+          <div>
+            <label className="text-xs font-medium mb-1 block opacity-70">Status</label>
+            <Select value={newStatus} onValueChange={setNewStatus}>
+              <SelectTrigger className="bg-slate-900/50">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="online">Online</SelectItem>
+                <SelectItem value="maintenance">Maintenance</SelectItem>
+                <SelectItem value="offline">Offline</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <label className="text-xs font-medium mb-1 block opacity-70">Message (optional)</label>
+            <Input
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              placeholder="Custom message to show users..."
+              className="bg-slate-900/50"
+            />
+          </div>
+          <div className="flex gap-2">
+            <Button onClick={handleSave} size="sm" className="gap-1">
+              <Save className="w-3 h-3" /> Save
+            </Button>
+            <Button onClick={() => setEditing(false)} size="sm" variant="outline">
+              Cancel
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <div>
+          {status.message && (
+            <p className="text-sm mb-3 opacity-80">{status.message}</p>
+          )}
+          <Button onClick={() => setEditing(true)} size="sm" variant="outline">
+            Edit Status
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const ModerationPanel = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
@@ -33,8 +129,12 @@ const ModerationPanel = () => {
   const [users, setUsers] = useState<UserData[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedUser, setSelectedUser] = useState<UserData | null>(null);
-  const [activeTab, setActiveTab] = useState<"users" | "logs">("users");
+  const [activeTab, setActiveTab] = useState<"users" | "logs" | "status">("users");
   const [logs, setLogs] = useState<any[]>([]);
+  
+  // Status management
+  const [statuses, setStatuses] = useState<StatusEntry[]>([]);
+  const [statusLoading, setStatusLoading] = useState(false);
   
   // Action dialogs
   const [showWarnDialog, setShowWarnDialog] = useState(false);
@@ -109,6 +209,40 @@ const ModerationPanel = () => {
       }
     } catch (error) {
       console.error("Fetch logs error:", error);
+    }
+  };
+
+  const fetchStatuses = async () => {
+    setStatusLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('site_status')
+        .select('id, status, message')
+        .order('id');
+      
+      if (error) throw error;
+      setStatuses(data || []);
+    } catch (error) {
+      console.error("Fetch status error:", error);
+      toast.error("Failed to fetch site status");
+    } finally {
+      setStatusLoading(false);
+    }
+  };
+
+  const updateStatus = async (id: string, status: string, message: string | null) => {
+    try {
+      const { error } = await supabase
+        .from('site_status')
+        .update({ status, message, updated_at: new Date().toISOString() })
+        .eq('id', id);
+      
+      if (error) throw error;
+      toast.success(`Status updated for ${id}`);
+      fetchStatuses();
+    } catch (error) {
+      console.error("Update status error:", error);
+      toast.error("Failed to update status");
     }
   };
 
@@ -245,6 +379,13 @@ const ModerationPanel = () => {
             className="gap-2"
           >
             <FileText className="w-4 h-4" /> Logs
+          </Button>
+          <Button 
+            variant={activeTab === "status" ? "default" : "outline"}
+            onClick={() => { setActiveTab("status"); fetchStatuses(); }}
+            className="gap-2"
+          >
+            <Activity className="w-4 h-4" /> Site Status
           </Button>
         </div>
 
@@ -394,6 +535,41 @@ const ModerationPanel = () => {
                 </div>
               ))
             )}
+          </div>
+        )}
+
+        {activeTab === "status" && (
+          <div className="space-y-6">
+            <div className="p-4 rounded-xl bg-cyan-500/10 border border-cyan-500/30">
+              <h3 className="font-semibold text-cyan-400 mb-2 flex items-center gap-2">
+                <Activity className="w-5 h-5" />
+                Site Status Management
+              </h3>
+              <p className="text-sm text-gray-400">
+                Control the status of different parts of UrbanShade. Setting a section to "offline" or "maintenance" will show a warning to users.
+              </p>
+            </div>
+
+            {statusLoading ? (
+              <div className="text-center py-12">
+                <RefreshCw className="w-8 h-8 animate-spin text-cyan-400 mx-auto mb-4" />
+                <p className="text-gray-400">Loading status...</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {statuses.map(status => (
+                  <StatusCard 
+                    key={status.id}
+                    status={status}
+                    onUpdate={updateStatus}
+                  />
+                ))}
+              </div>
+            )}
+
+            <Button onClick={fetchStatuses} variant="outline" className="gap-2">
+              <RefreshCw className="w-4 h-4" /> Refresh Status
+            </Button>
           </div>
         )}
       </div>

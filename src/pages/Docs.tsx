@@ -1,6 +1,7 @@
 import { ArrowLeft, Terminal, Rocket, Folder, Map, Keyboard, HelpCircle, Zap, Waves, Shield, Bug, BookOpen, Cpu, Package } from "lucide-react";
 import { Link } from "react-router-dom";
 import { DocSearch } from "@/components/DocSearch";
+import SupabaseConnectivityChecker from "@/components/SupabaseConnectivityChecker";
 
 const docSections = [
   {
@@ -332,6 +333,7 @@ const Docs = () => {
           </Link>
         </footer>
       </main>
+      <SupabaseConnectivityChecker currentRoute="docs" />
     </div>
   );
 };
