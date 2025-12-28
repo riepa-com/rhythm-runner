@@ -10,6 +10,7 @@ import { CrashScreen, CrashType, CrashData, triggerCrash } from "@/components/Cr
 import { InstallationScreen } from "@/components/InstallationScreen";
 import { MaintenanceMode } from "@/components/MaintenanceMode";
 import { LockdownScreen } from "@/components/LockdownScreen";
+import { NaviLockoutScreen } from "@/components/NaviLockoutScreen";
 import { FirstTimeTour } from "@/components/FirstTimeTour";
 import { RecoveryMode } from "@/components/RecoveryMode";
 import { DisclaimerScreen } from "@/components/DisclaimerScreen";
@@ -24,9 +25,12 @@ import { BugcheckScreen, createBugcheck, BugcheckData } from "@/components/Bugch
 import { actionDispatcher } from "@/lib/actionDispatcher";
 import { systemBus } from "@/lib/systemBus";
 import { commandQueue, QueuedCommand } from "@/lib/commandQueue";
+import { useNaviSecurity } from "@/hooks/useNaviSecurity";
 import SupabaseConnectivityChecker from "@/components/SupabaseConnectivityChecker";
 
 const Index = () => {
+  // NAVI AI Security System
+  const naviSecurity = useNaviSecurity();
   const [adminSetupComplete, setAdminSetupComplete] = useState(false);
   const [showingBiosTransition, setShowingBiosTransition] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -164,6 +168,18 @@ const Index = () => {
     (window as any).devMode = () => {
       setDevModeOpen(true);
       console.log("%c[SYSTEM] Opening Developer Console...", "color: #ff00ff; font-weight: bold");
+    };
+
+    // Expose NAVI security for testing
+    (window as any).naviSecurity = {
+      reportViolation: naviSecurity.reportViolation,
+      triggerLockout: naviSecurity.triggerLockout,
+      clearLockout: naviSecurity.clearLockout,
+      getStatus: () => ({
+        violations: naviSecurity.violations,
+        warningLevel: naviSecurity.warningLevel,
+        isLockedOut: naviSecurity.isLockedOut,
+      }),
     };
 
     // Show available commands in console
@@ -547,6 +563,17 @@ const Index = () => {
 
   if (!adminSetupComplete) {
     return <InstallationScreen onComplete={handleInstallationComplete} />;
+  }
+
+  // NAVI AI lockout takes highest priority
+  if (naviSecurity.isLockedOut && naviSecurity.lockoutTime) {
+    return (
+      <NaviLockoutScreen 
+        reason={naviSecurity.lockoutReason}
+        lockoutTime={naviSecurity.lockoutTime}
+        onUnlock={naviSecurity.clearLockout}
+      />
+    );
   }
 
   if (lockdownMode) {

@@ -48,6 +48,11 @@ export const PersonnelDirectory = () => {
     { id: "P007", name: "Dr. Amanda Foster", role: "Xenobiologist", clearance: 5, department: "Research", location: "Lab A-1", status: "active", phone: "x2840", email: "a.foster@urbanshade.corp" },
     { id: "P008", name: "Thomas Park", role: "Systems Admin", clearance: 3, department: "IT", location: "Server Room", status: "active", phone: "x5001", email: "t.park@urbanshade.corp" },
     { id: "P009", name: "Lisa Morrison", role: "Security Officer", clearance: 2, department: "Security", location: "Zone 4", status: "missing", phone: "x1021", email: "l.morrison@urbanshade.corp" },
+    // EXR-P (Expendable Rank-Prisoners) and MR-P (Medium Rank-Prisoners)
+    { id: "EXR-001", name: "Subject 7-Alpha", role: "EXR-P", clearance: 0, department: "Containment", location: "Cell Block A", status: "active", phone: "N/A", email: "N/A" },
+    { id: "EXR-002", name: "Subject 12-Delta", role: "EXR-P", clearance: 0, department: "Containment", location: "Cell Block B", status: "active", phone: "N/A", email: "N/A" },
+    { id: "MR-001", name: "Inmate Kovacs", role: "MR-P", clearance: 1, department: "Maintenance", location: "Utility Tunnel 3", status: "active", phone: "N/A", email: "N/A" },
+    { id: "MR-002", name: "Inmate Zhang", role: "MR-P", clearance: 1, department: "Sanitation", location: "Waste Processing", status: "active", phone: "N/A", email: "N/A" },
   ];
 
   const filtered = personnel.filter(p => 

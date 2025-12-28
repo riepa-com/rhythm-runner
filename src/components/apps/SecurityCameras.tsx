@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { FacilityMap } from "./FacilityMap";
 
 type ZoneId = "surface" | "light" | "entrance" | "heavy";
-type TeamId = "classD" | "scientists" | "foundation" | "chaos";
+type TeamId = "exrP" | "scientists" | "foundation" | "chaos";
 
 interface CameraFeed {
   id: string;

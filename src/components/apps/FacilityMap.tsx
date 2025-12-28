@@ -5,7 +5,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 
 type ZoneType = "light" | "heavy" | "entrance" | "surface";
-type TeamId = "classD" | "scientists" | "foundation" | "chaos";
+type TeamId = "exrP" | "scientists" | "foundation" | "chaos";
 
 interface Room {
   id: string;
@@ -25,7 +25,8 @@ interface PersonnelStats {
   scps: number;
   mtf: number;
   scientists: number;
-  classD: number;
+  exrP: number; // Expendable Rank-Prisoners
+  mrP: number;  // Medium Rank-Prisoners
   chaos: number;
 }
 
@@ -52,7 +53,7 @@ export const FacilityMap = () => {
     heavy: true,
   });
   const [teamDetection, setTeamDetection] = useState<Record<TeamId, boolean>>({
-    classD: true,
+    exrP: true,
     scientists: true,
     foundation: false,
     chaos: true,
@@ -64,7 +65,8 @@ export const FacilityMap = () => {
     scps: 1,
     mtf: 0,
     scientists: 2,
-    classD: 3,
+    exrP: 3,
+    mrP: 2,
     chaos: 0,
   });
 
@@ -134,7 +136,8 @@ export const FacilityMap = () => {
         scps: Math.max(0, p.scps + (Math.random() < 0.3 ? (Math.random() < 0.5 ? -1 : 1) : 0)),
         mtf: Math.max(0, Math.min(12, p.mtf + (Math.random() < 0.3 ? Math.floor(Math.random() * 3) - 1 : 0))),
         scientists: Math.max(0, Math.min(8, p.scientists + (Math.random() < 0.3 ? Math.floor(Math.random() * 3) - 1 : 0))),
-        classD: Math.max(0, Math.min(10, p.classD + (Math.random() < 0.3 ? Math.floor(Math.random() * 3) - 1 : 0))),
+        exrP: Math.max(0, Math.min(10, p.exrP + (Math.random() < 0.3 ? Math.floor(Math.random() * 3) - 1 : 0))),
+        mrP: Math.max(0, Math.min(6, p.mrP + (Math.random() < 0.2 ? Math.floor(Math.random() * 2) - 1 : 0))),
         chaos: Math.max(0, Math.min(5, p.chaos + (Math.random() < 0.2 ? Math.floor(Math.random() * 2) : 0))),
       }));
     }, 15000);
@@ -201,7 +204,7 @@ export const FacilityMap = () => {
 
   const getTeamColor = (team: TeamId) => {
     switch (team) {
-      case "classD": return "text-orange-400";
+      case "exrP": return "text-orange-400";
       case "scientists": return "text-white";
       case "foundation": return "text-blue-400";
       case "chaos": return "text-green-400";
@@ -294,7 +297,7 @@ export const FacilityMap = () => {
             <div className="space-y-4">
               <div className="text-xs text-cyan-600 uppercase tracking-wider">Select Teams to Detect</div>
               <div className="space-y-2">
-                {(["classD", "scientists", "foundation", "chaos"] as TeamId[]).map(team => (
+                {(["exrP", "scientists", "foundation", "chaos"] as TeamId[]).map(team => (
                   <label
                     key={team}
                     className="flex items-center gap-3 p-3 bg-[#1a1a2e] border border-cyan-500/20 cursor-pointer hover:bg-[#252536]"
@@ -306,7 +309,7 @@ export const FacilityMap = () => {
                       className="w-4 h-4"
                     />
                     <span className={`text-sm font-medium ${getTeamColor(team)}`}>
-                      {team === "classD" ? "Class-D Personnel" :
+                      {team === "exrP" ? "EXR-P Personnel" :
                        team === "scientists" ? "Scientists" :
                        team === "foundation" ? "Foundation Personnel" : "Chaos Insurgency"}
                     </span>
@@ -378,8 +381,13 @@ export const FacilityMap = () => {
           </div>
           <div className="flex items-center gap-2 text-xs">
             <HardHat className="w-4 h-4 text-orange-400" />
-            <span className="text-gray-500">Class-D:</span>
-            <span className="font-bold text-orange-400">{personnel.classD}</span>
+            <span className="text-gray-500">EXR-P:</span>
+            <span className="font-bold text-orange-400">{personnel.exrP}</span>
+          </div>
+          <div className="flex items-center gap-2 text-xs">
+            <Users className="w-4 h-4 text-yellow-400" />
+            <span className="text-gray-500">MR-P:</span>
+            <span className="font-bold text-yellow-400">{personnel.mrP}</span>
           </div>
           <div className="flex items-center gap-2 text-xs">
             <Users className="w-4 h-4 text-green-400" />
