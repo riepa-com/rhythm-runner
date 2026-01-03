@@ -118,6 +118,50 @@ Deno.serve(async (req) => {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
       }
+
+      if (action === 'vips') {
+        // Get all VIPs
+        const { data: vips, error } = await supabaseAdmin
+          .from('vips')
+          .select('*')
+          .order('granted_at', { ascending: false });
+
+        if (error) throw error;
+
+        return new Response(JSON.stringify({ vips }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+
+      if (action === 'site_lock_status') {
+        // Get site lock status
+        const { data: lock, error } = await supabaseAdmin
+          .from('site_locks')
+          .select('*')
+          .eq('id', 'global')
+          .single();
+
+        if (error) throw error;
+
+        return new Response(JSON.stringify({ lock }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+
+      if (action === 'navi_messages') {
+        // Get NAVI messages
+        const { data: messages, error } = await supabaseAdmin
+          .from('navi_messages')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(50);
+
+        if (error) throw error;
+
+        return new Response(JSON.stringify({ messages }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
     }
 
     if (req.method === 'POST') {
@@ -216,6 +260,129 @@ Deno.serve(async (req) => {
         console.log(`Admin ${user.id} IP banned ${targetIp}: ${reason}`);
 
         return new Response(JSON.stringify({ success: true, action: data }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+
+      // =============================================
+      // VIP SYSTEM ACTIONS
+      // =============================================
+      
+      if (action === 'grant_vip') {
+        const { targetUserId, reason } = body;
+        
+        const { data, error } = await supabaseAdmin
+          .from('vips')
+          .insert({
+            user_id: targetUserId,
+            granted_by: user.id,
+            reason
+          })
+          .select()
+          .single();
+
+        if (error) {
+          if (error.code === '23505') {
+            return new Response(JSON.stringify({ error: 'User is already VIP' }), {
+              status: 400,
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            });
+          }
+          throw error;
+        }
+        console.log(`Admin ${user.id} granted VIP to user ${targetUserId}: ${reason}`);
+
+        return new Response(JSON.stringify({ success: true, vip: data }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+
+      if (action === 'revoke_vip') {
+        const { targetUserId } = body;
+        
+        const { error } = await supabaseAdmin
+          .from('vips')
+          .delete()
+          .eq('user_id', targetUserId);
+
+        if (error) throw error;
+        console.log(`Admin ${user.id} revoked VIP from user ${targetUserId}`);
+
+        return new Response(JSON.stringify({ success: true }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+
+      // =============================================
+      // SITE LOCK ACTIONS
+      // =============================================
+      
+      if (action === 'lock_site') {
+        const { reason } = body;
+        
+        const { data, error } = await supabaseAdmin
+          .from('site_locks')
+          .update({
+            is_locked: true,
+            lock_reason: reason,
+            locked_at: new Date().toISOString(),
+            locked_by: user.id
+          })
+          .eq('id', 'global')
+          .select()
+          .single();
+
+        if (error) throw error;
+        console.log(`Admin ${user.id} locked site: ${reason}`);
+
+        return new Response(JSON.stringify({ success: true, lock: data }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+
+      if (action === 'unlock_site') {
+        const { data, error } = await supabaseAdmin
+          .from('site_locks')
+          .update({
+            is_locked: false,
+            lock_reason: null,
+            locked_at: null,
+            locked_by: null
+          })
+          .eq('id', 'global')
+          .select()
+          .single();
+
+        if (error) throw error;
+        console.log(`Admin ${user.id} unlocked site`);
+
+        return new Response(JSON.stringify({ success: true, lock: data }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+
+      // =============================================
+      // NAVI MESSAGE ACTIONS
+      // =============================================
+      
+      if (action === 'navi_message') {
+        const { message, priority, target } = body;
+        
+        const { data, error } = await supabaseAdmin
+          .from('navi_messages')
+          .insert({
+            message,
+            priority: priority || 'info',
+            target_audience: target || 'all',
+            sent_by: user.id
+          })
+          .select()
+          .single();
+
+        if (error) throw error;
+        console.log(`Admin ${user.id} sent NAVI message (${priority}/${target}): ${message.substring(0, 50)}...`);
+
+        return new Response(JSON.stringify({ success: true, naviMessage: data }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
       }

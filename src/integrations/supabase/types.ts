@@ -107,6 +107,33 @@ export type Database = {
         }
         Relationships: []
       }
+      navi_messages: {
+        Row: {
+          created_at: string | null
+          id: string
+          message: string
+          priority: string | null
+          sent_by: string | null
+          target_audience: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          message: string
+          priority?: string | null
+          sent_by?: string | null
+          target_audience?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          message?: string
+          priority?: string | null
+          sent_by?: string | null
+          target_audience?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -143,6 +170,30 @@ export type Database = {
           updated_at?: string
           user_id?: string
           username?: string
+        }
+        Relationships: []
+      }
+      site_locks: {
+        Row: {
+          id: string
+          is_locked: boolean | null
+          lock_reason: string | null
+          locked_at: string | null
+          locked_by: string | null
+        }
+        Insert: {
+          id?: string
+          is_locked?: boolean | null
+          lock_reason?: string | null
+          locked_at?: string | null
+          locked_by?: string | null
+        }
+        Update: {
+          id?: string
+          is_locked?: boolean | null
+          lock_reason?: string | null
+          locked_at?: string | null
+          locked_by?: string | null
         }
         Relationships: []
       }
@@ -266,6 +317,30 @@ export type Database = {
         }
         Relationships: []
       }
+      vips: {
+        Row: {
+          granted_at: string | null
+          granted_by: string | null
+          id: string
+          reason: string | null
+          user_id: string
+        }
+        Insert: {
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          reason?: string | null
+          user_id: string
+        }
+        Update: {
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          reason?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -291,6 +366,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_vip: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
