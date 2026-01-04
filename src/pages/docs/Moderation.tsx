@@ -267,6 +267,92 @@ const Moderation = () => {
           </div>
         </section>
 
+        {/* NAVI Monitor Tab */}
+        <section className="space-y-6">
+          <h3 className="text-2xl font-bold flex items-center gap-3">
+            <span className="w-8 h-8 rounded-full bg-cyan-500 flex items-center justify-center text-white font-bold text-sm">6</span>
+            NAVI Monitor
+          </h3>
+          <div className="p-6 rounded-lg bg-cyan-500/10 border border-cyan-500/30 space-y-4">
+            <p className="text-muted-foreground">
+              The NAVI Monitor tab provides real-time insights into NAVI bot activity and message filtering.
+            </p>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700">
+                <span className="font-bold text-cyan-400">Message Queue</span>
+                <p className="text-sm text-muted-foreground mt-1">
+                  View messages currently being processed by NAVI, including priority levels and delivery status.
+                </p>
+              </div>
+
+              <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700">
+                <span className="font-bold text-cyan-400">Filter Statistics</span>
+                <p className="text-sm text-muted-foreground mt-1">
+                  See how many messages NAVI has filtered, flagged, or allowed through.
+                </p>
+              </div>
+
+              <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700">
+                <span className="font-bold text-cyan-400">Response Times</span>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Monitor NAVI's response latency and performance metrics.
+                </p>
+              </div>
+
+              <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700">
+                <span className="font-bold text-cyan-400">Lockout Events</span>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Track when NAVI triggered lockouts and the reasons behind them.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Stats Tab */}
+        <section className="space-y-6">
+          <h3 className="text-2xl font-bold flex items-center gap-3">
+            <span className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold text-sm">7</span>
+            Statistics Dashboard
+          </h3>
+          <div className="p-6 rounded-lg bg-blue-500/10 border border-blue-500/30 space-y-4">
+            <p className="text-muted-foreground">
+              The Stats tab provides comprehensive analytics about user activity and moderation actions.
+            </p>
+
+            <div className="grid gap-4">
+              <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700">
+                <span className="font-bold text-blue-400">User Growth</span>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Track new signups, active users, and user retention over time with interactive charts.
+                </p>
+              </div>
+
+              <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700">
+                <span className="font-bold text-blue-400">Moderation Metrics</span>
+                <p className="text-sm text-muted-foreground mt-1">
+                  See warnings issued, bans enacted, and appeals processed with trend analysis.
+                </p>
+              </div>
+
+              <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700">
+                <span className="font-bold text-blue-400">Role Distribution</span>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Visualize the breakdown of users by role: regular users, VIPs, staff, and admins.
+                </p>
+              </div>
+
+              <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700">
+                <span className="font-bold text-blue-400">Activity Heatmap</span>
+                <p className="text-sm text-muted-foreground mt-1">
+                  See when users are most active to plan maintenance windows and announcements.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Best Practices */}
         <section className="space-y-6">
           <h3 className="text-2xl font-bold flex items-center gap-3">

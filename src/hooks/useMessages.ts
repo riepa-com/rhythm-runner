@@ -143,6 +143,35 @@ export const useMessages = () => {
     priority: 'normal' | 'high' | 'urgent' = 'normal'
   ) => {
     try {
+      // Check if sender is Aswd (owner) - bypass rate limits
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return { success: false, error: 'Not authenticated' };
+      
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('username')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      
+      const isAswd = profile?.username?.toLowerCase() === 'aswd';
+      
+      // If Aswd, send directly without rate limit check
+      if (isAswd) {
+        const { error: insertError } = await supabase
+          .from('messages')
+          .insert({
+            sender_id: user.id,
+            recipient_id: recipientId,
+            subject,
+            body,
+            priority
+          });
+        
+        if (insertError) throw insertError;
+        return { success: true };
+      }
+      
+      // For everyone else, use rate-limited function
       const { data, error } = await supabase.rpc('check_and_send_message', {
         p_recipient_id: recipientId,
         p_subject: subject,
@@ -163,16 +192,13 @@ export const useMessages = () => {
         return { success: false, error: result.error };
       }
 
-      // Refresh pending count
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { count } = await supabase
-          .from('messages')
-          .select('*', { count: 'exact', head: true })
-          .eq('sender_id', user.id)
-          .is('read_at', null);
-        setPendingCount(count || 0);
-      }
+      // Refresh pending count (user already fetched above)
+      const { count } = await supabase
+        .from('messages')
+        .select('*', { count: 'exact', head: true })
+        .eq('sender_id', user.id)
+        .is('read_at', null);
+      setPendingCount(count || 0);
 
       return { success: true };
     } catch (error) {

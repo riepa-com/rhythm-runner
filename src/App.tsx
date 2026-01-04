@@ -28,6 +28,18 @@ import UURDocs from "./pages/docs/UUR";
 import Features from "./pages/docs/Features";
 import Safety from "./pages/docs/Safety";
 import Moderation from "./pages/docs/Moderation";
+
+// Safety sub-pages
+import Badges from "./pages/docs/safety/Badges";
+import AccountSafety from "./pages/docs/safety/AccountSafety";
+import Reporting from "./pages/docs/safety/Reporting";
+
+// Moderation sub-pages
+import ModerationOverview from "./pages/docs/moderation/Overview";
+import NaviMonitor from "./pages/docs/moderation/NaviMonitor";
+import ModerationActions from "./pages/docs/moderation/Actions";
+import Statistics from "./pages/docs/moderation/Statistics";
+
 import NotFound from "./pages/NotFound";
 import ModerationPanel from "./pages/ModerationPanel";
 import StatusPage from "./pages/Status";
@@ -80,8 +92,19 @@ const App = () => (
         <Route path="/docs/def-dev/diagnostics" element={<DefDevDiagnostics />} />
         <Route path="/docs/uur" element={<UURDocs />} />
         <Route path="/docs/features" element={<Features />} />
+        
+        {/* Safety docs - hub and sub-pages */}
         <Route path="/docs/safety" element={<Safety />} />
+        <Route path="/docs/safety/badges" element={<Badges />} />
+        <Route path="/docs/safety/account" element={<AccountSafety />} />
+        <Route path="/docs/safety/reporting" element={<Reporting />} />
+        
+        {/* Moderation docs - hub and sub-pages */}
         <Route path="/docs/moderation" element={<Moderation />} />
+        <Route path="/docs/moderation/overview" element={<ModerationOverview />} />
+        <Route path="/docs/moderation/navi" element={<NaviMonitor />} />
+        <Route path="/docs/moderation/actions" element={<ModerationActions />} />
+        <Route path="/docs/moderation/stats" element={<Statistics />} />
         
         {/* Account Manager - nested routes */}
         <Route path="/acc-manage" element={<AccManageLayout />}>
