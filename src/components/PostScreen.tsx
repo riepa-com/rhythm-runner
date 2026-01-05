@@ -79,19 +79,28 @@ export const PostScreen = ({ onComplete, onEnterBios }: PostScreenProps) => {
     ];
 
     let index = 0;
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+    
     const showNext = () => {
       if (index < devices.length) {
-        setLines(prev => [...prev, devices[index].name]);
-        const delay = devices[index].delay;
-        index++;
-        setTimeout(showNext, delay);
+        const device = devices[index];
+        if (device) {
+          setLines(prev => [...prev, device.name]);
+          const delay = device.delay;
+          index++;
+          timeoutId = setTimeout(showNext, delay);
+        }
       } else {
         setLines(prev => [...prev, '', 'All devices initialized successfully.']);
-        setTimeout(() => setPhase('prompt'), isFastBoot ? 200 : 500);
+        timeoutId = setTimeout(() => setPhase('prompt'), isFastBoot ? 200 : 500);
       }
     };
 
     showNext();
+    
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
   }, [phase, isFastBoot]);
 
   // Prompt phase
