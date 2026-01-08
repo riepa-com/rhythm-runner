@@ -58,11 +58,24 @@ const SupportTicketsTab = ({ isDemo }: { isDemo: boolean }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
   const [currentAdminId, setCurrentAdminId] = useState<string | null>(null);
+  const [currentAdminUsername, setCurrentAdminUsername] = useState<string | null>(null);
+
+  // Staff usernames (Aswd is considered staff in Support)
+  const STAFF_USERNAMES = ['aswd', 'Aswd', 'ASWD'];
 
   useEffect(() => {
     const getAdminId = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (user) setCurrentAdminId(user.id);
+      if (user) {
+        setCurrentAdminId(user.id);
+        // Get username
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('username')
+          .eq('user_id', user.id)
+          .single();
+        if (profile) setCurrentAdminUsername(profile.username);
+      }
     };
     getAdminId();
   }, []);

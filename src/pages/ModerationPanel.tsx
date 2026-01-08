@@ -1,4 +1,4 @@
-// Moderation Panel v3.1 - Sidebar Navigation
+// Moderation Panel v3.0 - Sidebar Navigation
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
@@ -8,13 +8,14 @@ import {
   Settings, Database, Wifi, Globe, Server, ChevronDown, ChevronRight,
   TriangleAlert, ShieldAlert, ShieldCheck, Filter, Download, Trash2,
   MessageSquare, Bell, Volume2, VolumeX, Cpu, HardDrive, Crown, Megaphone,
-  UserCog, Send, Star, Sparkles, Bot, BarChart3, Hash
+  UserCog, Send, Star, Sparkles, Bot, BarChart3, Hash, Flag
 } from "lucide-react";
 import { NaviAuthoritiesTab } from "@/components/moderation/NaviAuthoritiesTab";
 import { NaviAutonomousPanel } from "@/components/moderation/NaviAutonomousPanel";
 import { StatsTab } from "@/components/moderation/StatsTab";
 import SupportTicketsTab from "@/components/moderation/SupportTicketsTab";
 import { NaviAIChatTab } from "@/components/moderation/NaviAIChatTab";
+import ReportsTab from "@/components/moderation/ReportsTab";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -41,7 +42,7 @@ interface UserData {
     is_fake: boolean;
   };
   warningsCount: number;
-  warnings: Array<{ reason: string; created_at: string }>;
+  warnings: Array<{ id: string; reason: string; created_at: string }>;
   created_at: string;
   lastActive?: string;
   isVip?: boolean;
@@ -108,8 +109,8 @@ const DEMO_USERS: UserData[] = [
     },
     warningsCount: 2,
     warnings: [
-      { reason: "Demo warning 1", created_at: new Date().toISOString() },
-      { reason: "Demo warning 2", created_at: new Date().toISOString() },
+      { id: "demo-warn-1", reason: "Demo warning 1", created_at: new Date().toISOString() },
+      { id: "demo-warn-2", reason: "Demo warning 2", created_at: new Date().toISOString() },
     ],
     created_at: new Date(Date.now() - 86400000 * 7).toISOString(),
     isVip: false,
@@ -123,7 +124,7 @@ const DEMO_USERS: UserData[] = [
     clearance: 2,
     isBanned: false,
     warningsCount: 1,
-    warnings: [{ reason: "Demo warning", created_at: new Date().toISOString() }],
+    warnings: [{ id: "demo-warn-3", reason: "Demo warning", created_at: new Date().toISOString() }],
     created_at: new Date(Date.now() - 86400000 * 3).toISOString(),
     isVip: false,
   },
@@ -251,7 +252,7 @@ const StatusCard = ({ status, onUpdate }: { status: StatusEntry; onUpdate: (id: 
 };
 
 // User details panel
-const UserDetailsPanel = ({ user, onClose, onWarn, onBan, onUnban, onOp, onDeop, onVip, onRevokeVip, isDemo, isCreator }: { 
+const UserDetailsPanel = ({ user, onClose, onWarn, onBan, onUnban, onOp, onDeop, onVip, onRevokeVip, onRemoveWarning, isDemo, isCreator }: { 
   user: UserData; 
   onClose: () => void;
   onWarn: () => void;
@@ -261,6 +262,7 @@ const UserDetailsPanel = ({ user, onClose, onWarn, onBan, onUnban, onOp, onDeop,
   onDeop: () => void;
   onVip: () => void;
   onRevokeVip: () => void;
+  onRemoveWarning: (warningId: string) => void;
   isDemo: boolean;
   isCreator: boolean;
 }) => {
@@ -347,9 +349,17 @@ const UserDetailsPanel = ({ user, onClose, onWarn, onBan, onUnban, onOp, onDeop,
               </h4>
               <div className="space-y-2">
                 {user.warnings.slice(0, 5).map((w, i) => (
-                  <div key={i} className="p-2 rounded bg-amber-500/10 border border-amber-500/20 text-sm">
+                  <div key={w.id || i} className="p-2 rounded bg-amber-500/10 border border-amber-500/20 text-sm group relative">
                     <p className="text-amber-300">{w.reason}</p>
                     <p className="text-xs text-slate-500 mt-1">{new Date(w.created_at).toLocaleDateString()}</p>
+                    <Button
+                      onClick={(e) => { e.stopPropagation(); onRemoveWarning(w.id); }}
+                      size="sm"
+                      variant="ghost"
+                      className="absolute top-1 right-1 h-6 w-6 p-0 opacity-0 group-hover:opacity-100 hover:bg-red-500/20 hover:text-red-400 transition-opacity"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </Button>
                   </div>
                 ))}
               </div>
@@ -546,6 +556,9 @@ const ModerationPanel = () => {
   const [showBroadcastDialog, setShowBroadcastDialog] = useState(false);
   const [showVipDialog, setShowVipDialog] = useState(false);
   const [showNaviMessageDialog, setShowNaviMessageDialog] = useState(false);
+  const [showRemoveWarningDialog, setShowRemoveWarningDialog] = useState(false);
+  const [selectedWarningId, setSelectedWarningId] = useState<string | null>(null);
+  const [removeWarningReason, setRemoveWarningReason] = useState("");
   const [warnReason, setWarnReason] = useState("");
   const [banReason, setBanReason] = useState("");
   const [banDuration, setBanDuration] = useState<"1h" | "24h" | "7d" | "30d" | "perm">("24h");
@@ -999,7 +1012,7 @@ const ModerationPanel = () => {
     
     const updatedUsers = users.map(u => 
       u.id === selectedUser.id 
-        ? { ...u, warningsCount: u.warningsCount + 1, warnings: [...u.warnings, { reason: warnReason, created_at: new Date().toISOString() }] } 
+        ? { ...u, warningsCount: u.warningsCount + 1, warnings: [...u.warnings, { id: `demo-${Date.now()}`, reason: warnReason, created_at: new Date().toISOString() }] } 
         : u
     );
     setUsers(updatedUsers);
@@ -1452,6 +1465,13 @@ const ModerationPanel = () => {
               color="purple"
             />
             <SidebarNavItem 
+              icon={Flag} 
+              label="Reports" 
+              active={activeTab === 'reports'} 
+              onClick={() => setActiveTab('reports')} 
+              color="amber"
+            />
+            <SidebarNavItem 
               icon={Bot} 
               label="NAVI Config" 
               active={activeTab === 'navi-config'} 
@@ -1714,6 +1734,11 @@ const ModerationPanel = () => {
             <SupportTicketsTab isDemo={isDemoMode} />
           )}
 
+          {/* Reports Tab */}
+          {activeTab === 'reports' && (
+            <ReportsTab isDemo={isDemoMode} />
+          )}
+
           {/* NAVI Config Tab (formerly Autonomous) */}
           {activeTab === 'navi-config' && (
             <NaviAutonomousPanel />
@@ -1809,6 +1834,7 @@ const ModerationPanel = () => {
           onDeop={handleDeop}
           onVip={() => setShowVipDialog(true)}
           onRevokeVip={handleRevokeVip}
+          onRemoveWarning={(warningId) => { setSelectedWarningId(warningId); setShowRemoveWarningDialog(true); }}
           isDemo={isDemoMode}
           isCreator={isCreator}
         />
@@ -2259,6 +2285,70 @@ const ModerationPanel = () => {
             <Button variant="outline" onClick={() => setShowNaviMessageDialog(false)} className="border-slate-700">Cancel</Button>
             <Button onClick={handleNaviMessage} className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 gap-2">
               <Bot className="w-4 h-4" /> {isDemoMode && '[DEMO] '}Send NAVI Message
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Remove Warning Dialog */}
+      <Dialog open={showRemoveWarningDialog} onOpenChange={setShowRemoveWarningDialog}>
+        <DialogContent className="bg-slate-950 border-amber-500/30">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-amber-400 font-mono">
+              <Trash2 className="w-5 h-5" />
+              REMOVE WARNING
+            </DialogTitle>
+            <DialogDescription className="font-mono text-slate-400">
+              You must provide a reason for removing this warning.
+            </DialogDescription>
+          </DialogHeader>
+          <Textarea
+            value={removeWarningReason}
+            onChange={(e) => setRemoveWarningReason(e.target.value)}
+            placeholder="Enter reason for removal (required)..."
+            rows={3}
+            className="bg-slate-900 border-slate-700 font-mono"
+          />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setShowRemoveWarningDialog(false); setRemoveWarningReason(""); }} className="border-slate-700">Cancel</Button>
+            <Button 
+              onClick={async () => {
+                if (!selectedWarningId || !removeWarningReason.trim()) {
+                  toast.error("Please provide a reason");
+                  return;
+                }
+                if (isDemoMode) {
+                  // Demo mode - just update local state
+                  if (selectedUser) {
+                    const updatedUsers = users.map(u => 
+                      u.id === selectedUser.id 
+                        ? { ...u, warningsCount: Math.max(0, u.warningsCount - 1), warnings: u.warnings.filter(w => w.id !== selectedWarningId) } 
+                        : u
+                    );
+                    setUsers(updatedUsers);
+                    setSelectedUser({ ...selectedUser, warningsCount: Math.max(0, selectedUser.warningsCount - 1), warnings: selectedUser.warnings.filter(w => w.id !== selectedWarningId) });
+                  }
+                  toast.success("[DEMO] Warning removed");
+                } else {
+                  try {
+                    const response = await supabase.functions.invoke('admin-actions', {
+                      body: { action: 'remove_warning', warningId: selectedWarningId, reason: removeWarningReason }
+                    });
+                    if (response.error) throw response.error;
+                    toast.success("Warning removed");
+                    fetchUsers();
+                  } catch (error) {
+                    toast.error("Failed to remove warning");
+                  }
+                }
+                setShowRemoveWarningDialog(false);
+                setRemoveWarningReason("");
+                setSelectedWarningId(null);
+              }} 
+              disabled={!removeWarningReason.trim()}
+              className="bg-amber-600 hover:bg-amber-500"
+            >
+              Remove Warning
             </Button>
           </DialogFooter>
         </DialogContent>

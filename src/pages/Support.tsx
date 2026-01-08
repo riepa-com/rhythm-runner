@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, HelpCircle, MessageCircle, Search, Book, ChevronRight, Send, Bot, User, Ticket, ThumbsUp, ThumbsDown, Loader2, AlertCircle } from "lucide-react";
+import { ArrowLeft, HelpCircle, MessageCircle, Search, Book, ChevronRight, Send, Bot, User, Ticket, ThumbsUp, ThumbsDown, Loader2, AlertCircle, Flag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
-type SupportView = 'home' | 'faq' | 'contact';
+type SupportView = 'home' | 'faq' | 'contact' | 'report';
 type TicketStatus = 'open' | 'pending_human' | 'in_progress' | 'resolved' | 'closed';
 
 interface FAQItem {
@@ -848,11 +848,14 @@ const Support = () => {
                     Troubleshooting Guide
                   </Button>
                 </Link>
-                <a href="https://urbanshade.statuspage.io" target="_blank" rel="noopener noreferrer">
-                  <Button variant="outline" size="sm" className="border-slate-700 text-slate-300 hover:text-white hover:border-slate-600">
-                    System Status
-                  </Button>
-                </a>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="border-amber-500/50 text-amber-400 hover:text-amber-300 hover:border-amber-500 gap-1"
+                  onClick={() => setView('report')}
+                >
+                  <Flag className="w-3 h-3" /> Submit Report
+                </Button>
                 <Link to="/team">
                   <Button variant="outline" size="sm" className="border-slate-700 text-slate-300 hover:text-white hover:border-slate-600">
                     Meet the Team
@@ -1094,6 +1097,26 @@ const Support = () => {
                 </form>
               </div>
             </Card>
+          </div>
+        )}
+
+        {view === 'report' && (
+          <div className="space-y-6">
+            <div className="flex items-center gap-4 mb-8">
+              <Flag className="w-8 h-8 text-amber-400" />
+              <div>
+                <h2 className="text-2xl font-bold text-white">Submit Report</h2>
+                <p className="text-slate-400">Report issues, bugs, or inappropriate behavior</p>
+              </div>
+            </div>
+            <div className="p-6 rounded-lg bg-slate-800/50 border border-slate-700 text-center">
+              <p className="text-slate-300 mb-4">Use our dedicated reporting page for a better experience.</p>
+              <Link to="/report">
+                <Button className="gap-2">
+                  <Flag className="w-4 h-4" /> Go to Report Page
+                </Button>
+              </Link>
+            </div>
           </div>
         )}
 
