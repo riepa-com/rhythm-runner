@@ -14,6 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      chat_rate_limits: {
+        Row: {
+          identifier: string
+          is_authenticated: boolean
+          last_message_at: string
+        }
+        Insert: {
+          identifier: string
+          is_authenticated?: boolean
+          last_message_at?: string
+        }
+        Update: {
+          identifier?: string
+          is_authenticated?: boolean
+          last_message_at?: string
+        }
+        Relationships: []
+      }
       friends: {
         Row: {
           created_at: string | null
@@ -40,6 +58,56 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      global_chat_messages: {
+        Row: {
+          content: string
+          created_at: string
+          display_name: string
+          id: string
+          is_deleted: boolean
+          is_system: boolean
+          is_vip: boolean | null
+          reply_to_id: string | null
+          temp_session_id: string | null
+          user_id: string | null
+          user_role: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          display_name: string
+          id?: string
+          is_deleted?: boolean
+          is_system?: boolean
+          is_vip?: boolean | null
+          reply_to_id?: string | null
+          temp_session_id?: string | null
+          user_id?: string | null
+          user_role?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          display_name?: string
+          id?: string
+          is_deleted?: boolean
+          is_system?: boolean
+          is_vip?: boolean | null
+          reply_to_id?: string | null
+          temp_session_id?: string | null
+          user_id?: string | null
+          user_role?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "global_chat_messages_reply_to_id_fkey"
+            columns: ["reply_to_id"]
+            isOneToOne: false
+            referencedRelation: "global_chat_messages"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       message_rate_limits: {
         Row: {
@@ -804,6 +872,7 @@ export type Database = {
         }
         Returns: Json
       }
+      cleanup_old_chat_messages: { Args: never; Returns: undefined }
       get_available_admin: {
         Args: never
         Returns: {

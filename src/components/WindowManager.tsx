@@ -7,7 +7,7 @@ import { ActionLogger } from "./apps/ActionLogger";
 import { NetworkScanner } from "./apps/NetworkScanner";
 import { Terminal } from "./apps/Terminal";
 import { TaskManager } from "./apps/TaskManager";
-import { Messages } from "./apps/Messages";
+import GlobalChat from "./apps/GlobalChat";
 import { IncidentReports } from "./apps/IncidentReports";
 import { DatabaseViewer } from "./apps/DatabaseViewer";
 import { Browser } from "./apps/Browser";
@@ -105,7 +105,7 @@ export const WindowManager = ({ windows, onClose, onFocus, onMinimize, allWindow
       case "task-manager":
         return <TaskManager windows={allWindows} onCloseWindow={onCloseWindow} onCriticalKill={onCriticalKill} />;
       case "messages":
-        return <Messages />;
+        return <GlobalChat />;
       case "incidents":
         return <IncidentReports />;
       case "database":
