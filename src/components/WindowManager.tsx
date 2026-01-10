@@ -95,7 +95,15 @@ export const WindowManager = ({ windows, onClose, onFocus, onMinimize, allWindow
       case "monitor":
         return <SystemMonitor />;
       case "personnel":
-        return <PersonnelDirectory />;
+        return <UserDirectory />;
+      case "user-directory":
+        return <UserDirectory />;
+      case "leaderboards":
+        return <Leaderboards />;
+      case "achievements":
+        return <AchievementsViewer />;
+      case "events-calendar":
+        return <EventsCalendar />;
       case "logger":
         return <ActionLogger />;
       case "network":
@@ -253,7 +261,7 @@ export const WindowManager = ({ windows, onClose, onFocus, onMinimize, allWindow
               [{appId.toUpperCase()}] Application interface loading...
             </p>
             <p className="mt-4 text-xs">
-              Urbanshade OS v2.9 — Application module
+              Urbanshade OS v3.1 — Application module
             </p>
           </div>
         );
