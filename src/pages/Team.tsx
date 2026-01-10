@@ -1,4 +1,4 @@
-import { ArrowLeft, Github, Code, Cloud, TestTube, Lightbulb, Crown, Users, Heart, Waves, GitCommit, MapPin, Coffee, Target, Handshake, Search, Palette, Bot, Calendar, Bug, Eye, Cpu } from 'lucide-react';
+import { ArrowLeft, Github, Code, Cloud, TestTube, Lightbulb, Crown, Users, Heart, GitCommit, MapPin, Coffee, Target, Handshake, Search, Palette, Bot, Calendar, Bug, Eye, Rocket, Zap, Shield, Database, Terminal, Gamepad2, MessageSquare, Settings, Lock, ChevronRight, Star, ExternalLink } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 import aswdAvatar from '@/assets/team-aswd.png';
@@ -20,23 +20,100 @@ interface TeamMember {
   isCreator?: boolean;
 }
 
+interface TimelineEvent {
+  date: string;
+  title: string;
+  description: string;
+  icon: React.ReactNode;
+  color: string;
+}
+
+const projectTimeline: TimelineEvent[] = [
+  {
+    date: "January 27, 2025",
+    title: "The Beginning",
+    description: "Urbanshade OS was born from a simple question: what if someone built a fully functional fake operating system? The first lines of code were written that night.",
+    icon: <Rocket className="w-5 h-5" />,
+    color: "text-yellow-400",
+  },
+  {
+    date: "February 2025",
+    title: "Core Systems Built",
+    description: "The window manager, taskbar, start menu, and basic applications came together. The foundation of what would become a surprisingly complex system was laid.",
+    icon: <Terminal className="w-5 h-5" />,
+    color: "text-blue-400",
+  },
+  {
+    date: "February 2025",
+    title: "Authentication System",
+    description: "User accounts, login screens, and profile management were added. The project started feeling like an actual operating system.",
+    icon: <Lock className="w-5 h-5" />,
+    color: "text-green-400",
+  },
+  {
+    date: "March 2025",
+    title: "Cloud Integration",
+    description: "Settings sync, cloud storage, and online features were implemented. Users could now save their preferences and access them anywhere.",
+    icon: <Cloud className="w-5 h-5" />,
+    color: "text-cyan-400",
+  },
+  {
+    date: "March 2025",
+    title: "Admin Panel",
+    description: "A full administration system was built for managing users, monitoring activity, and handling moderation. The project grew beyond a simple demo.",
+    icon: <Shield className="w-5 h-5" />,
+    color: "text-red-400",
+  },
+  {
+    date: "April 2025",
+    title: "DefDev Console",
+    description: "Developer tools, debugging features, and system diagnostics were added. A complete development environment within the operating system.",
+    icon: <Code className="w-5 h-5" />,
+    color: "text-purple-400",
+  },
+  {
+    date: "April 2025",
+    title: "The Containment Game",
+    description: "A full game was built within the operating system. Anomaly containment, facility management, and narrative elements - all playable in a window.",
+    icon: <Gamepad2 className="w-5 h-5" />,
+    color: "text-orange-400",
+  },
+  {
+    date: "May 2025",
+    title: "Messaging System",
+    description: "Global chat, direct messages, and a contact system were implemented. Users could now communicate with each other in real time.",
+    icon: <MessageSquare className="w-5 h-5" />,
+    color: "text-pink-400",
+  },
+  {
+    date: "2025",
+    title: "Continuous Development",
+    description: "New features, bug fixes, and improvements continue to be added. The project keeps growing with community feedback and new ideas.",
+    icon: <Zap className="w-5 h-5" />,
+    color: "text-primary",
+  },
+];
+
 const teamMembers: TeamMember[] = [
   {
     name: "Aswd_LV",
     avatar: aswdAvatar,
-    role: "Founder & Lead Developer",
+    role: "Founder and Lead Developer",
     title: "The Architect",
-    startDate: "January 27th, 2025",
+    startDate: "January 27, 2025",
     contributions: [
-      { icon: <Code className="w-4 h-4" />, label: "Core codebase (95%)" },
+      { icon: <Code className="w-4 h-4" />, label: "Core codebase" },
       { icon: <Crown className="w-4 h-4" />, label: "Project founder" },
       { icon: <Lightbulb className="w-4 h-4" />, label: "Vision and direction" },
       { icon: <Cloud className="w-4 h-4" />, label: "Cloud infrastructure" },
+      { icon: <Shield className="w-4 h-4" />, label: "Admin systems" },
+      { icon: <Database className="w-4 h-4" />, label: "Database design" },
     ],
     bio: [
-      "I started Urbanshade on January 27th, 2025. What began as a random idea quickly turned into something I genuinely care about. I have written around 95% of the code, designed how most of the systems work together, and spent more late nights than I can count making sure everything runs properly.",
-      "From the authentication system to the admin panel, cloud sync to the moderation tools - I have had a hand in building most of it. There have been plenty of frustrating moments where things just would not work, but figuring those out is part of what makes this fun.",
-      "I should be upfront about something: yes, AI tools have been involved in parts of development. But we use them as tools to help us build faster, not as a replacement for our own ideas and decisions. The weird features, the unusual design choices, the decision to make this project way more detailed than it needs to be - that is all us. I am genuinely excited about where this is headed."
+      "I started Urbanshade on January 27, 2025. It began as a random thought about whether someone could build a fully functional fake operating system, and instead of just wondering, I started building. That night turned into months of development, and the project kept growing far beyond what I originally imagined.",
+      "I have written the vast majority of the code, from the window management system to the authentication flow, from the admin panel to the cloud sync features. The containment game, the messaging system, the developer console - most of it came from late nights of coding and figuring things out as I went.",
+      "About AI tools: yes, they have been part of the development process. I use them to help move faster, but the ideas, the direction, and the decisions are all mine. When something unusual gets added to Urbanshade, it is because I thought it would be interesting, not because a tool suggested it. The personality of this project comes from the people building it.",
+      "I am genuinely proud of what this has become. It started as something that maybe no one would ever use, and now there are people actually exploring it and finding features I forgot I built. That is a good feeling."
     ],
     color: "from-yellow-500/30 to-amber-600/30",
     borderColor: "border-yellow-500/50",
@@ -46,7 +123,7 @@ const teamMembers: TeamMember[] = [
   {
     name: "plplll",
     avatar: plplllAvatar,
-    role: "Developer & Tester",
+    role: "Developer and Tester",
     title: "The Collaborator",
     startDate: "Early 2025",
     contributions: [
@@ -56,9 +133,10 @@ const teamMembers: TeamMember[] = [
       { icon: <Lightbulb className="w-4 h-4" />, label: "Ideas and feedback" },
     ],
     bio: [
-      "I joined in early 2025 when things were already getting interesting. Could not resist being part of my friend's project, especially once I saw where it was going. I have contributed to the cloud features, written some code here and there, and spent a lot of time testing things that probably should not work but somehow do.",
-      "My main contribution is ideas and feedback. Sometimes when you are deep in a project you need someone with fresh eyes to point out what is working and what is not - that is where I come in. Plus, I get to break things on purpose and call it testing, which is a pretty good arrangement if you ask me.",
-      "On the AI thing: yes, some tools have helped with development, but the humans are the ones making decisions and having fun with it. I mean, why does a passion project need a full cloud system? Ask Aswd, I just help build it."
+      "I joined early in 2025 when my friend showed me what he was working on. The project was already taking shape, and I could not resist being part of it. Getting to help build something this ambitious with someone I know is exactly the kind of project I wanted to be involved in.",
+      "My contributions are spread across different areas. I have worked on cloud features, helped with testing, and provided ideas and feedback throughout development. Sometimes the most valuable thing I do is point out when something could work better or when a feature feels off. Fresh perspective matters.",
+      "I also get to break things on purpose and call it quality assurance. Testing edge cases, trying weird input combinations, and seeing what happens when you use features in ways they were not designed for - it is surprisingly fun work.",
+      "On the topic of AI in development: it is a tool we use, but the creativity is ours. The unusual decisions, the features that make you wonder why they exist - those come from actual people having fun with the project."
     ],
     color: "from-slate-500/20 to-zinc-500/20",
     borderColor: "border-slate-500/30",
@@ -67,19 +145,19 @@ const teamMembers: TeamMember[] = [
   {
     name: "robo-karlix",
     avatarIcon: <Bot className="w-16 h-16 text-purple-400" />,
-    role: "Lead Tester & Ideas",
+    role: "Lead Tester and Ideas",
     title: "The Strategist",
     startDate: "2025",
     contributions: [
       { icon: <TestTube className="w-4 h-4" />, label: "Extensive testing" },
-      { icon: <Eye className="w-4 h-4" />, label: "Tech-savvy perspective" },
+      { icon: <Eye className="w-4 h-4" />, label: "Technical perspective" },
       { icon: <Lightbulb className="w-4 h-4" />, label: "Feature ideas" },
       { icon: <Bug className="w-4 h-4" />, label: "Edge case hunting" },
     ],
     bio: [
-      "I handle the more thorough side of testing. While others might click around and see if things work, I try to think about how features should behave from a more technical standpoint. What happens if you do this and then that? What if someone tries something unexpected?",
-      "Beyond testing, I contribute a lot of ideas for new features and improvements. Having used plenty of software and knowing what works well elsewhere, I try to bring that perspective to Urbanshade. Sometimes the best features come from asking simple questions about how things could be better.",
-      "I look at things from a more tech-savvy angle, which helps catch issues that casual testing might miss and suggests features that more advanced users would appreciate."
+      "I handle the more detailed side of testing. While casual testing catches obvious problems, I approach things from a more technical angle. What happens if you do things in an unexpected order? What if you push a feature beyond its intended use? How do systems interact when multiple things happen at once?",
+      "Beyond finding issues, I contribute a lot of ideas for new features and improvements. Having used a wide variety of software, I bring perspective on what works well elsewhere and what could make Urbanshade better. Sometimes the best features come from simple observations about what is missing.",
+      "My testing focuses on the experience of users who understand technology well. There are edge cases and advanced use patterns that casual testing does not cover, and that is where I spend most of my time. Finding those issues before users do makes the project better for everyone."
     ],
     color: "from-purple-500/20 to-violet-500/20",
     borderColor: "border-purple-500/30",
@@ -97,9 +175,10 @@ const teamMembers: TeamMember[] = [
       { icon: <Users className="w-4 h-4" />, label: "User perspective" },
     ],
     bio: [
-      "I am the designated bug finder around here. My job is straightforward: use things the way a regular person would, find what breaks, and report back. I click buttons in weird orders and try features without reading instructions first, because that is what actual users do.",
-      "Quality assurance sounds fancy, but really I am just here to make sure you do not run into the same problems I stumble upon. My approach is less technical and more practical - if something feels confusing or does not work the way you would expect, I notice it.",
-      "Also, I like The Simpsons. No particular reason, just felt like mentioning it."
+      "My job is straightforward: use Urbanshade the way a regular person would and find what breaks. I click buttons in weird orders, skip instructions, and try things that probably should not work. That is what actual users end up doing, so someone needs to test for it.",
+      "I represent the perspective of users who are not particularly technical. If something feels confusing or does not work the way someone would expect, I notice it. The goal is to make sure you do not run into the same problems I find.",
+      "Quality assurance might sound formal, but really I am just here to stumble upon issues before you do. If I get confused by something, chances are other people will too, and that feedback helps make the experience better.",
+      "Also, I like The Simpsons. No real connection to the project, just thought I would mention it."
     ],
     color: "from-green-500/20 to-emerald-500/20",
     borderColor: "border-green-500/30",
@@ -112,11 +191,23 @@ const Team = () => {
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-foreground">
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-white/10 bg-black/80 backdrop-blur-sm">
-        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between gap-4">
-          <h1 className="text-xl font-bold text-primary">URBANSHADE Team</h1>
+        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
+              <Users className="w-4 h-4 text-primary" />
+            </div>
+            <h1 className="text-xl font-bold text-primary">URBANSHADE Team</h1>
+          </div>
+          <div className="flex items-center gap-3">
+            <Link 
+              to="/team/git"
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-purple-500/20 border border-purple-500/30 text-purple-400 hover:bg-purple-500/30 transition-colors text-sm"
+            >
+              <GitCommit className="w-4 h-4" />
+              Contributors
+            </Link>
             <a 
-              href="https://github.com/Urbanshade-Team" 
+              href="https://github.com/aswdBatch/urbanshade-OS" 
               target="_blank" 
               rel="noopener noreferrer"
               className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-muted-foreground hover:bg-white/10 transition-colors text-sm"
@@ -129,115 +220,190 @@ const Team = () => {
               className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/20 border border-primary/30 text-primary hover:bg-primary/30 transition-colors text-sm"
             >
               <ArrowLeft className="w-4 h-4" />
-              Back to App
+              Back
             </Link>
           </div>
         </div>
       </header>
 
-      {/* Content */}
-      <main className="max-w-4xl mx-auto px-6 py-12 space-y-16">
+      <main className="max-w-5xl mx-auto px-6 py-12 space-y-20">
         {/* Hero */}
-        <section className="text-center space-y-6">
+        <section className="text-center space-y-8">
           <div className="relative inline-block">
-            <Users className="w-20 h-20 mx-auto text-primary animate-pulse" />
-            <div className="absolute -inset-4 bg-primary/20 blur-xl rounded-full -z-10" />
+            <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-primary/30 to-purple-500/30 flex items-center justify-center border border-primary/30">
+              <Users className="w-12 h-12 text-primary" />
+            </div>
+            <div className="absolute -inset-4 bg-primary/10 blur-2xl rounded-full -z-10" />
           </div>
           
-          <h2 className="text-5xl font-bold">
-            Meet the <span className="text-primary">URBANSHADE</span> Team
-          </h2>
-          
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            A small group of developers, testers, and contributors who decided to build 
-            a surprisingly detailed fake operating system. We have no regrets.
-          </p>
+          <div className="space-y-4">
+            <h2 className="text-5xl md:text-6xl font-bold tracking-tight">
+              Meet the <span className="text-primary">Team</span>
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+              We are a small group of developers and testers who decided to build a fake operating system 
+              that somehow became way more detailed than it needed to be. We are minors, we are friends, 
+              and we are having a great time with this project.
+            </p>
+          </div>
 
-          <div className="flex flex-wrap justify-center gap-4 text-sm text-muted-foreground">
-            <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10 flex items-center gap-2">
-              <MapPin className="w-3 h-3" />
+          <div className="flex flex-wrap justify-center gap-3 text-sm">
+            <span className="px-4 py-2 rounded-full bg-white/5 border border-white/10 flex items-center gap-2 text-muted-foreground">
+              <MapPin className="w-4 h-4 text-primary" />
               Made in Latvia
             </span>
-            <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10 flex items-center gap-2">
-              <Coffee className="w-3 h-3" />
+            <span className="px-4 py-2 rounded-full bg-white/5 border border-white/10 flex items-center gap-2 text-muted-foreground">
+              <Coffee className="w-4 h-4 text-amber-400" />
               Fueled by Coffee
             </span>
-            <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10 flex items-center gap-2">
-              <Target className="w-3 h-3" />
-              100% Passion Project
+            <span className="px-4 py-2 rounded-full bg-white/5 border border-white/10 flex items-center gap-2 text-muted-foreground">
+              <Target className="w-4 h-4 text-green-400" />
+              Passion Project
             </span>
-            <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10 flex items-center gap-2">
-              <Handshake className="w-3 h-3" />
+            <span className="px-4 py-2 rounded-full bg-white/5 border border-white/10 flex items-center gap-2 text-muted-foreground">
+              <Handshake className="w-4 h-4 text-blue-400" />
               Open to Contributors
             </span>
           </div>
+
+          {/* Quick Stats */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto pt-4">
+            <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+              <div className="text-3xl font-bold text-primary">4</div>
+              <div className="text-sm text-muted-foreground">Core Team</div>
+            </div>
+            <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+              <div className="text-3xl font-bold text-yellow-400">2025</div>
+              <div className="text-sm text-muted-foreground">Founded</div>
+            </div>
+            <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+              <div className="text-3xl font-bold text-green-400">100+</div>
+              <div className="text-sm text-muted-foreground">Features</div>
+            </div>
+            <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+              <div className="text-3xl font-bold text-purple-400">Open</div>
+              <div className="text-sm text-muted-foreground">Source</div>
+            </div>
+          </div>
         </section>
 
-        {/* Our Story Section */}
-        <section className="p-8 rounded-xl bg-gradient-to-br from-primary/20 via-blue-500/10 to-purple-500/20 border-2 border-primary/40 shadow-xl">
-          <h3 className="text-3xl font-bold mb-6 text-primary flex items-center gap-3">
-            <Waves className="w-8 h-8" />
-            The Story Behind Urbanshade OS
-          </h3>
-          <div className="space-y-4 text-muted-foreground leading-relaxed">
-            <p className="text-lg">
-              It started on <strong className="text-primary">January 27th, 2025</strong>, with a simple thought: 
-              what if someone made a fully functional fake operating system, just for the sake of it? Instead of 
-              dismissing the idea and going to sleep, the building actually began.
+        {/* Project Story */}
+        <section className="space-y-8">
+          <div className="text-center space-y-4">
+            <h3 className="text-3xl font-bold">The Story</h3>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              How a random idea turned into a surprisingly complex project.
             </p>
-            <p>
-              What started as a weird side project turned into something much bigger. Friends joined in, ideas 
-              kept flowing, and before long there were authentication systems, admin panels, cloud sync, and 
-              far more features than any joke project should reasonably have. A messaging system. A moderation 
-              panel. A full developer console. Why? Because it was fun to build.
+          </div>
+
+          <div className="p-8 rounded-2xl bg-gradient-to-br from-primary/10 via-blue-500/5 to-purple-500/10 border border-primary/20">
+            <div className="space-y-6 text-muted-foreground leading-relaxed">
+              <p className="text-lg">
+                It started on <strong className="text-primary">January 27, 2025</strong>. The idea was simple: 
+                what would it take to build a fully functional fake operating system? Not just a mockup with 
+                static images, but something with working windows, real applications, and actual functionality.
+              </p>
+              <p>
+                What began as a weekend experiment turned into months of development. Features kept getting added - 
+                an authentication system, cloud sync, an admin panel, a developer console, even a full game 
+                built inside the operating system. Each new addition made the project more interesting, and 
+                there was no reason to stop.
+              </p>
+              <p>
+                Friends joined in to help with testing and ideas. The codebase grew. The scope expanded. 
+                Somewhere along the way, what started as a joke project became something we are genuinely 
+                proud of. It may not have a practical purpose, but it is ours, and we built it together.
+              </p>
+              <div className="pt-4 border-t border-white/10">
+                <p className="text-sm">
+                  <strong className="text-primary">A note on AI tools:</strong> Yes, we use them as part of 
+                  development. They help us move faster and figure things out. But the ideas, the weird features, 
+                  the decision to make this way more complex than necessary - that comes from us. AI is a tool. 
+                  The creativity is human.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Project Timeline */}
+        <section className="space-y-8">
+          <div className="text-center space-y-4">
+            <h3 className="text-3xl font-bold">Project Timeline</h3>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Key milestones in the development of Urbanshade OS.
             </p>
-            <p>
-              We will be honest about something: AI tools have been involved in parts of development. But here is 
-              how we see it - we use AI as a tool, not a replacement for creativity. The unusual ideas, the odd 
-              feature choices, the decision to add things like a fake ban prank - that is all human decision-making. 
-              We are having fun, and we think that shows in the result.
-            </p>
-            <p className="text-lg font-medium text-primary">
-              Urbanshade OS is proof that passion projects do not need a practical purpose. Sometimes the journey 
-              is the destination.
-            </p>
+          </div>
+
+          <div className="relative">
+            {/* Timeline line */}
+            <div className="absolute left-8 top-0 bottom-0 w-px bg-gradient-to-b from-primary/50 via-purple-500/50 to-transparent hidden md:block" />
+
+            <div className="space-y-6">
+              {projectTimeline.map((event, index) => (
+                <div key={index} className="flex gap-6 group">
+                  {/* Timeline dot */}
+                  <div className="hidden md:flex flex-col items-center">
+                    <div className={`w-16 h-16 rounded-xl bg-black/60 border border-white/10 flex items-center justify-center ${event.color} group-hover:border-current/30 transition-colors`}>
+                      {event.icon}
+                    </div>
+                  </div>
+
+                  {/* Content */}
+                  <div className="flex-1 p-6 rounded-xl bg-white/5 border border-white/10 hover:border-white/20 transition-colors">
+                    <div className="flex items-start justify-between gap-4 mb-3">
+                      <div>
+                        <span className={`text-sm font-medium ${event.color}`}>{event.date}</span>
+                        <h4 className="text-lg font-bold mt-1">{event.title}</h4>
+                      </div>
+                      <div className={`md:hidden w-10 h-10 rounded-lg bg-black/40 border border-white/10 flex items-center justify-center ${event.color}`}>
+                        {event.icon}
+                      </div>
+                    </div>
+                    <p className="text-muted-foreground">{event.description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
 
         {/* Avatar Disclaimer */}
         <section className="text-center p-6 rounded-xl bg-amber-500/10 border border-amber-500/30">
           <p className="text-amber-400 text-lg font-medium">
-            Since we prefer not to show our faces, we use our Roblox avatars instead
+            We use Roblox avatars instead of real photos
           </p>
           <p className="text-sm text-muted-foreground mt-2">
-            Privacy first. Besides, our avatars are honestly cooler than we are in real life.
+            Privacy is important to us. Our avatars represent us online, and honestly, they look better anyway.
           </p>
         </section>
 
         {/* Team Grid */}
         <section className="space-y-8">
-          <h3 className="text-2xl font-bold text-center">The Crew</h3>
-          <p className="text-center text-muted-foreground max-w-xl mx-auto">
-            The people behind this unusually detailed operating system project.
-          </p>
+          <div className="text-center space-y-4">
+            <h3 className="text-3xl font-bold">The Team</h3>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              The people who build, test, and improve Urbanshade OS.
+            </p>
+          </div>
           
           <div className="space-y-8">
             {teamMembers.map((member) => (
               <div 
                 key={member.name}
-                className={`p-8 rounded-xl bg-gradient-to-br ${member.color} border-2 ${member.borderColor} transition-all group relative ${member.isCreator ? 'ring-2 ring-yellow-500/50 shadow-lg shadow-yellow-500/20' : ''}`}
+                className={`p-8 rounded-2xl bg-gradient-to-br ${member.color} border-2 ${member.borderColor} transition-all group relative ${member.isCreator ? 'ring-2 ring-yellow-500/30 shadow-lg shadow-yellow-500/10' : ''}`}
               >
-                {/* Creator highlight badge */}
+                {/* Creator badge */}
                 {member.isCreator && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-yellow-500 text-black text-sm font-bold flex items-center gap-2 shadow-lg">
                     <Crown className="w-4 h-4" />
-                    THE CREATOR
+                    PROJECT CREATOR
                   </div>
                 )}
 
-                <div className="flex flex-col md:flex-row gap-6">
-                  {/* Avatar & Quick Info */}
-                  <div className="flex flex-col items-center md:items-start md:w-48 shrink-0">
+                <div className="flex flex-col lg:flex-row gap-8">
+                  {/* Left side - Avatar and info */}
+                  <div className="flex flex-col items-center lg:items-start lg:w-56 shrink-0">
                     <div className={`w-32 h-32 mb-4 rounded-xl overflow-hidden border-2 shadow-lg bg-black/40 flex items-center justify-center ${member.isCreator ? 'border-yellow-500 ring-2 ring-yellow-500/30' : 'border-white/20'}`}>
                       {member.avatar ? (
                         <img 
@@ -249,14 +415,18 @@ const Team = () => {
                         member.avatarIcon
                       )}
                     </div>
-                    <h4 className={`text-xl font-bold ${member.textColor} text-center md:text-left flex items-center gap-2`}>
+                    
+                    <h4 className={`text-xl font-bold ${member.textColor} text-center lg:text-left flex items-center gap-2`}>
                       {member.name}
                       {member.isCreator && <Crown className="w-5 h-5 text-yellow-400" />}
                     </h4>
+                    
                     <span className={`inline-block px-3 py-1 rounded-full border text-xs mt-2 ${member.isCreator ? 'bg-yellow-500/20 border-yellow-500/30 text-yellow-400' : 'bg-black/40 border-white/10 text-muted-foreground'}`}>
                       {member.role}
                     </span>
+                    
                     <p className="text-sm text-muted-foreground italic mt-2">"{member.title}"</p>
+                    
                     <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
                       <Calendar className="w-3 h-3" />
                       Since {member.startDate}
@@ -276,13 +446,13 @@ const Team = () => {
                     </div>
                   </div>
 
-                  {/* Bio */}
+                  {/* Right side - Bio */}
                   <div className="flex-1 space-y-4">
                     {member.isCreator && (
-                      <div className="p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30 mb-4">
+                      <div className="p-4 rounded-lg bg-yellow-500/10 border border-yellow-500/30 mb-4">
                         <p className="text-sm text-yellow-400 font-medium flex items-center gap-2">
                           <Crown className="w-4 h-4" />
-                          The person who asked "what if we made a fake OS" and then actually went and did it. Started this project, still running it.
+                          The person who started this whole thing and is still running it. Asked "what if" and then actually went and built it.
                         </p>
                       </div>
                     )}
@@ -299,93 +469,123 @@ const Team = () => {
         </section>
 
         {/* Our Values */}
-        <section className="space-y-6">
-          <h3 className="text-2xl font-bold text-center">What We Believe In</h3>
-          <div className="grid gap-4 md:grid-cols-3">
-            <div className="p-4 rounded-lg bg-black/40 border border-white/10 text-center">
-              <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-primary/20 flex items-center justify-center">
-                <Search className="w-6 h-6 text-primary" />
+        <section className="space-y-8">
+          <div className="text-center space-y-4">
+            <h3 className="text-3xl font-bold">What We Care About</h3>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              The principles that guide how we build Urbanshade.
+            </p>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-3">
+            <div className="p-6 rounded-xl bg-white/5 border border-white/10 hover:border-primary/30 transition-colors group">
+              <div className="w-14 h-14 rounded-xl bg-primary/20 flex items-center justify-center mb-4 group-hover:bg-primary/30 transition-colors">
+                <Search className="w-7 h-7 text-primary" />
               </div>
-              <h4 className="font-bold text-primary mb-2">Transparency</h4>
-              <p className="text-sm text-muted-foreground">
-                We are upfront about how things are built and what goes into the project. Open source, open communication.
+              <h4 className="font-bold text-lg mb-2">Transparency</h4>
+              <p className="text-muted-foreground">
+                We are open about how things work, including the parts that might be controversial. 
+                The code is open source, and we are honest about our development process.
               </p>
             </div>
-            <div className="p-4 rounded-lg bg-black/40 border border-white/10 text-center">
-              <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-primary/20 flex items-center justify-center">
-                <Palette className="w-6 h-6 text-primary" />
+            
+            <div className="p-6 rounded-xl bg-white/5 border border-white/10 hover:border-primary/30 transition-colors group">
+              <div className="w-14 h-14 rounded-xl bg-primary/20 flex items-center justify-center mb-4 group-hover:bg-primary/30 transition-colors">
+                <Palette className="w-7 h-7 text-primary" />
               </div>
-              <h4 className="font-bold text-primary mb-2">Creativity</h4>
-              <p className="text-sm text-muted-foreground">
-                Why make something ordinary when you can build a fully simulated underwater facility OS? Go big or go home.
+              <h4 className="font-bold text-lg mb-2">Creativity</h4>
+              <p className="text-muted-foreground">
+                Why make something ordinary when you can go overboard? The decision to add features 
+                that probably do not need to exist is part of what makes this project fun.
               </p>
             </div>
-            <div className="p-4 rounded-lg bg-black/40 border border-white/10 text-center">
-              <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-primary/20 flex items-center justify-center">
-                <Users className="w-6 h-6 text-primary" />
+            
+            <div className="p-6 rounded-xl bg-white/5 border border-white/10 hover:border-primary/30 transition-colors group">
+              <div className="w-14 h-14 rounded-xl bg-primary/20 flex items-center justify-center mb-4 group-hover:bg-primary/30 transition-colors">
+                <Users className="w-7 h-7 text-primary" />
               </div>
-              <h4 className="font-bold text-primary mb-2">Community</h4>
-              <p className="text-sm text-muted-foreground">
-                Built by contributors, shaped by feedback. What users say matters and influences what gets built next.
+              <h4 className="font-bold text-lg mb-2">Community</h4>
+              <p className="text-muted-foreground">
+                Built by contributors, shaped by feedback. What users say matters and directly 
+                influences what gets built. We want people to be part of this.
               </p>
             </div>
           </div>
         </section>
 
         {/* All Contributors Link */}
-        <section className="p-6 rounded-xl bg-gradient-to-br from-purple-500/10 to-indigo-500/10 border border-purple-500/30 text-center">
-          <GitCommit className="w-10 h-10 mx-auto text-purple-400 mb-3" />
-          <h3 className="text-xl font-bold mb-2">See All Contributors</h3>
-          <p className="text-muted-foreground max-w-lg mx-auto mb-4">
-            Everyone who has contributed to Urbanshade, whether through code, ideas, testing, or feedback.
-          </p>
-          <Link 
-            to="/team/git"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-purple-500/20 border border-purple-500/30 text-purple-400 hover:bg-purple-500/30 transition-colors font-medium"
-          >
-            <Users className="w-5 h-5" />
-            View All Contributors
-          </Link>
+        <section className="p-8 rounded-2xl bg-gradient-to-br from-purple-500/10 to-indigo-500/10 border border-purple-500/30">
+          <div className="flex flex-col md:flex-row items-center gap-6">
+            <div className="w-16 h-16 rounded-xl bg-purple-500/20 flex items-center justify-center">
+              <GitCommit className="w-8 h-8 text-purple-400" />
+            </div>
+            <div className="flex-1 text-center md:text-left">
+              <h3 className="text-xl font-bold mb-2">All Contributors</h3>
+              <p className="text-muted-foreground">
+                Everyone who has contributed to Urbanshade, including GitHub contributors. See commit 
+                counts, contribution history, and more.
+              </p>
+            </div>
+            <Link 
+              to="/team/git"
+              className="flex items-center gap-2 px-6 py-3 rounded-xl bg-purple-500/20 border border-purple-500/30 text-purple-400 hover:bg-purple-500/30 transition-colors font-medium"
+            >
+              <Users className="w-5 h-5" />
+              View All
+              <ChevronRight className="w-4 h-4" />
+            </Link>
+          </div>
         </section>
 
         {/* Join Section */}
-        <section className="p-8 rounded-xl bg-gradient-to-br from-green-500/10 to-emerald-500/10 border border-green-500/30 text-center">
-          <Heart className="w-12 h-12 mx-auto text-green-500 mb-4" />
-          <h3 className="text-2xl font-bold mb-3">Want to Join the Team?</h3>
+        <section className="p-8 rounded-2xl bg-gradient-to-br from-green-500/10 to-emerald-500/10 border border-green-500/30 text-center">
+          <div className="w-16 h-16 rounded-xl bg-green-500/20 flex items-center justify-center mx-auto mb-6">
+            <Heart className="w-8 h-8 text-green-500" />
+          </div>
+          <h3 className="text-2xl font-bold mb-3">Want to Contribute?</h3>
           <p className="text-muted-foreground max-w-lg mx-auto mb-6">
             We are always open to new contributors. Whether you want to help with code, testing, 
             ideas, documentation, or just want to be part of the project - we would be glad to have you.
           </p>
           <div className="flex gap-4 justify-center flex-wrap">
             <a 
-              href="https://github.com/Urbanshade-Team" 
+              href="https://github.com/aswdBatch/urbanshade-OS" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="flex items-center gap-2 px-6 py-3 rounded-lg bg-green-500/20 border border-green-500/30 text-green-400 hover:bg-green-500/30 transition-colors font-medium"
+              className="flex items-center gap-2 px-6 py-3 rounded-xl bg-green-500/20 border border-green-500/30 text-green-400 hover:bg-green-500/30 transition-colors font-medium"
             >
               <Github className="w-5 h-5" />
-              Check out our GitHub
+              GitHub Repository
             </a>
             <Link 
               to="/docs"
-              className="flex items-center gap-2 px-6 py-3 rounded-lg bg-white/5 border border-white/10 text-muted-foreground hover:bg-white/10 transition-colors font-medium"
+              className="flex items-center gap-2 px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-muted-foreground hover:bg-white/10 transition-colors font-medium"
             >
               <Code className="w-5 h-5" />
-              Read the Docs
+              Documentation
             </Link>
           </div>
         </section>
 
         {/* Footer */}
-        <footer className="text-center pt-8 border-t border-white/10 space-y-4">
-          <p className="text-sm text-muted-foreground flex items-center justify-center gap-2">
-            URBANSHADE Team <span className="text-muted-foreground/50">•</span> Made with <Heart className="w-4 h-4 text-red-500" /> in Latvia <span className="text-muted-foreground/50">•</span> 2025
-          </p>
+        <footer className="text-center pt-8 border-t border-white/10 space-y-6">
+          <div className="flex items-center justify-center gap-2 text-muted-foreground">
+            <span className="font-medium text-primary">URBANSHADE Team</span>
+            <span className="text-muted-foreground/30">|</span>
+            <span>Made with</span>
+            <Heart className="w-4 h-4 text-red-500" />
+            <span>in Latvia</span>
+            <span className="text-muted-foreground/30">|</span>
+            <span>2025</span>
+          </div>
           <div className="flex justify-center gap-6 text-sm">
             <Link to="/terms" className="text-muted-foreground hover:text-primary transition-colors">Terms</Link>
             <Link to="/privacy" className="text-muted-foreground hover:text-primary transition-colors">Privacy</Link>
             <Link to="/docs" className="text-muted-foreground hover:text-primary transition-colors">Docs</Link>
             <Link to="/status" className="text-muted-foreground hover:text-primary transition-colors">Status</Link>
+            <a href="https://github.com/aswdBatch/urbanshade-OS" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-1">
+              GitHub <ExternalLink className="w-3 h-3" />
+            </a>
           </div>
         </footer>
       </main>
