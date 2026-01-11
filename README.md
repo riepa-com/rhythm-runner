@@ -1,3 +1,8 @@
+soon 👀
+<img width="1280" height="695" alt="image" src="https://github.com/user-attachments/assets/f491ccc7-04aa-4e9e-b1c5-49414cb4fede" />
+
+
+
 ## Urbanshade OS reaches 400 commits!
 This is a big thing, and im very happy for this!
 
