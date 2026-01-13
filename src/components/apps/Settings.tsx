@@ -174,18 +174,14 @@ export const Settings = ({ onUpdate }: { onUpdate?: () => void }) => {
 
   const storage = calculateStorageUsage();
 
+  // Consolidated categories - less cluttered
   const categories = [
-    { id: "system", name: "System", icon: Monitor, description: "Device info, updates" },
-    { id: "display", name: "Display", icon: Palette, description: "Theme, resolution" },
+    { id: "system", name: "System", icon: Monitor, description: "Updates, power & info" },
+    { id: "display", name: "Personalization", icon: Palette, description: "Theme, sound, visuals" },
     { id: "network", name: "Network", icon: Wifi, description: "Wi-Fi, VPN" },
-    { id: "sound", name: "Sound", icon: Volume2, description: "Volume, effects" },
-    { id: "storage", name: "Storage", icon: HardDrive, description: "Disk usage" },
-    { id: "accounts", name: "Accounts", icon: Users, description: "Users, sync" },
-    { id: "time", name: "Time & Language", icon: Clock, description: "Clock, region" },
-    { id: "privacy", name: "Privacy", icon: Shield, description: "Security settings" },
-    { id: "accessibility", name: "Accessibility", icon: Accessibility, description: "Visual aids" },
+    { id: "storage", name: "Storage & Data", icon: HardDrive, description: "Backup, import/export" },
+    { id: "accounts", name: "Accounts & Sync", icon: Users, description: "Profile, cloud sync" },
     { id: "notifications", name: "Notifications", icon: Bell, description: "Alerts, DND" },
-    { id: "power", name: "Power", icon: Power, description: "Battery, sleep" },
     { id: "about", name: "About", icon: Info, description: "System info" },
   ];
 
@@ -401,7 +397,44 @@ export const Settings = ({ onUpdate }: { onUpdate?: () => void }) => {
               </SettingCard>
             </div>
 
-            <SectionHeader title="Display" description="Screen and resolution settings" />
+            <SectionHeader title="Sound" description="Audio settings" />
+            
+            <div className="space-y-3">
+              <div className="p-5 rounded-xl bg-card/50 border border-border/50">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                      <Volume2 className="w-5 h-5 text-primary" />
+                    </div>
+                    <span className="font-medium">Master Volume</span>
+                  </div>
+                  <span className="text-sm font-mono text-muted-foreground">{volume[0]}%</span>
+                </div>
+                <Slider 
+                  value={volume} 
+                  max={100} 
+                  step={1}
+                  onValueChange={(v) => { setVolume(v); handleSave("settings_volume", v); }}
+                  className="w-full"
+                />
+              </div>
+
+              <SettingCard icon={muteEnabled ? X : Volume2} title="Mute" description="Silence all sounds">
+                <Switch 
+                  checked={muteEnabled} 
+                  onCheckedChange={(checked) => { setMuteEnabled(checked); handleSave("settings_mute", checked); }} 
+                />
+              </SettingCard>
+
+              <SettingCard icon={Zap} title="Sound Effects" description="System sounds and alerts">
+                <Switch 
+                  checked={soundEffects} 
+                  onCheckedChange={(checked) => { setSoundEffects(checked); handleSave("settings_sound_effects", checked); }} 
+                />
+              </SettingCard>
+            </div>
+
+            <SectionHeader title="Display" description="Screen settings" />
 
             <div className="space-y-3">
               <SettingCard icon={Monitor} title="Resolution" description="Display resolution">
